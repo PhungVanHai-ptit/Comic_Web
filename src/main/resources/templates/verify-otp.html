@@ -7,11 +7,7 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     
     <link href="../static/css/navbar.css" rel="stylesheet">
     <style>
@@ -33,7 +29,6 @@
             position: relative;
         }
 
-        /* Background blur effects */
         .bg-blur-container {
             position: fixed;
             inset: 0;
@@ -63,7 +58,6 @@
             filter: blur(100px);
         }
 
-        /* OTP Card */
         .otp-card {
             background-color: var(--card-dark);
             border-radius: 1.5rem;
@@ -75,9 +69,7 @@
         }
 
         @media (min-width: 768px) {
-            .otp-card {
-                padding: 3rem;
-            }
+            .otp-card { padding: 3rem; }
         }
 
         .otp-icon {
@@ -91,6 +83,7 @@
             color: var(--primary);
             margin-bottom: 2rem;
         }
+        .otp-icon .bi { font-size: 2.5rem; }
 
         .otp-header h1 {
             font-size: 1.5rem;
@@ -101,9 +94,7 @@
         }
 
         @media (min-width: 768px) {
-            .otp-header h1 {
-                font-size: 1.875rem;
-            }
+            .otp-header h1 { font-size: 1.875rem; }
         }
 
         .otp-header p {
@@ -113,23 +104,17 @@
             margin-bottom: 2.5rem;
         }
 
-        /* OTP Input */
         .otp-inputs {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.75rem;
             margin-bottom: 2.5rem;
         }
 
-        @media (min-width: 576px) {
-            .otp-inputs {
-                gap: 0.75rem;
-            }
-        }
-
+        /* FIX: dùng type="text" thay type="number" để maxlength hoạt động */
         .otp-input {
-            width: 3rem;
-            height: 3.5rem;
+            width: 100%;
+            aspect-ratio: 1 / 1;
             text-align: center;
             background-color: rgba(255, 255, 255, 0.05);
             border: 2px solid transparent;
@@ -140,13 +125,6 @@
             transition: all 0.2s;
         }
 
-        @media (min-width: 576px) {
-            .otp-input {
-                width: 3.5rem;
-                height: 4rem;
-            }
-        }
-
         .otp-input:focus {
             border-color: var(--primary);
             background-color: transparent;
@@ -154,17 +132,25 @@
             box-shadow: 0 0 0 0.2rem rgba(140, 37, 244, 0.25);
         }
 
-        .otp-input::-webkit-outer-spin-button,
-        .otp-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        /* Trạng thái đã điền */
+        .otp-input.filled {
+            border-color: rgba(140, 37, 244, 0.4);
+            background-color: rgba(140, 37, 244, 0.08);
         }
 
-        .otp-input[type=number] {
-            -moz-appearance: textfield;
+        /* Trạng thái lỗi */
+        .otp-input.error {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.08);
+            animation: shake 0.3s ease;
         }
 
-        /* Submit button */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
         .btn-verify {
             width: 100%;
             height: 3.5rem;
@@ -179,18 +165,10 @@
             margin-bottom: 2rem;
         }
 
-        .btn-verify:hover {
-            background-color: #7a1fd6;
-        }
+        .btn-verify:hover { background-color: #7a1fd6; }
+        .btn-verify:active { transform: scale(0.98); }
 
-        .btn-verify:active {
-            transform: scale(0.98);
-        }
-
-        /* Resend section */
-        .resend-section {
-            text-align: center;
-        }
+        .resend-section { text-align: center; }
 
         .resend-section p {
             color: var(--text-secondary);
@@ -208,14 +186,12 @@
             font-size: 0.875rem;
         }
 
-        .timer-box .material-symbols-outlined {
+        .timer-box .bi {
             color: var(--primary);
             font-size: 1.25rem;
         }
 
-        .timer-text {
-            color: var(--text-secondary);
-        }
+        .timer-text { color: var(--text-secondary); }
 
         .timer-countdown {
             font-weight: 700;
@@ -223,7 +199,6 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Back link */
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -235,219 +210,200 @@
             transition: all 0.2s;
         }
 
-        .back-link:hover {
-            color: white;
-        }
-
-        .back-link:hover .material-symbols-outlined {
-            transform: translateX(-0.25rem);
-        }
-
-        .back-link .material-symbols-outlined {
+        .back-link:hover { color: white; }
+        .back-link:hover .bi { transform: translateX(-0.25rem); }
+        .back-link .bi {
             font-size: 1.125rem;
             transition: transform 0.2s;
         }
-
     </style>
 </head>
 <body>
-    <!-- Background blur effects -->
     <div class="bg-blur-container">
         <div class="blur-circle-1"></div>
         <div class="blur-circle-2"></div>
     </div>
 
     <!-- Header -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid px-3 px-lg-5">
-            <!-- Brand -->
-            <a class="navbar-brand" href="home.html">
-                <span class="material-symbols-outlined" style="color: var(--primary); font-size: 1.875rem;">auto_stories</span>
-                MangaRead
-            </a>
-            <!-- Mobile search and menu buttons -->
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                <!-- Mobile search button -->
-                <button class="btn-mobile-search" type="button" data-bs-toggle="modal" data-bs-target="#mobileSearchModal">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
-                
-                <!-- Toggler for mobile -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>  
-            <!-- Nav items -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto ms-lg-4">
-                    <li class="nav-item">
-                        <a class="nav-link" href="home.html">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            Thể loại
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Action</a></li>
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Romance</a></li>
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Comedy</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="following-comics.html">Theo dõi</a>
-                    </li>
-                </ul>
-
-                <!-- Search bar (hidden on mobile) -->
-                <div class="search-container d-none d-lg-block flex-grow-1 mx-4">
-                    <span class="search-icon material-symbols-outlined" style="font-size: 1.25rem;">search</span>
-                    <input type="text" class="search-input form-control" id="searchInput" placeholder="Tìm theo tên truyện, tên tác giả">
-                    
-                    <!-- Search dropdown -->
-                    <div class="search-dropdown" id="searchDropdown">
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Leveling</div>
-                                <div class="search-result-meta">Chugong • Action, Fantasy</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Bug Player</div>
-                                <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">The Lone Necromancer</div>
-                                <div class="search-result-meta">JJJ • Supernatural</div>
-                            </div>
-                        </div>
-                        <div class="search-footer">
-                            <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- User avatar and logout (logged in state) -->
-                <div class="d-flex align-items-center gap-3" id="userSection">
-                    <a href="profile.html" class="avatar-button" title="Trang cá nhân">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="User Avatar">
-                    </a>
-                    <button class="btn-logout" onclick="handleLogout()">
-                        Đăng xuất
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid px-3 px-lg-5">
+                <!-- Brand -->
+                <a class="navbar-brand" href="home.html">
+                    <i class="bi bi-book" style="color: var(--primary); font-size: 1.5rem; text-shadow:  1px 0 currentColor, -1px 0 currentColor, 0 1px currentColor, 0 -1px currentColor;"></i>
+                    MangaRead
+                </a>
+                <!-- Mobile search and menu buttons -->
+                <div class="d-flex align-items-center gap-2 d-lg-none">
+                    <!-- Mobile search button -->
+                    <button class="btn-mobile-search" type="button" data-bs-toggle="modal" data-bs-target="#mobileSearchModal">
+                        <i class="bi bi-search"></i>
                     </button>
-                </div>
-
-                <!-- Auth buttons (not logged in state - hidden by default) -->
-                <div class="d-none align-items-center gap-2" id="authButtons">
-                    <button class="btn-login" onclick="showLoginForm()">Đăng nhập</button>
-                    <button class="btn-signup">Đăng ký</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <!-- Mobile Search Modal -->
-    <div class="modal fade mobile-search-modal" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen-sm-down">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="mobileSearchModalLabel" style="color: white; font-weight: 600;">Tìm kiếm</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Search input -->
-                    <div class="mobile-search-input-wrapper">
-                        <div class="search-container" style="max-width: 100%;">
-                            <span class="search-icon material-symbols-outlined" style="font-size: 1.25rem;">search</span>
-                            <input type="text" class="search-input form-control" id="mobileSearchInput" placeholder="Search manga, authors, studios...">
-                        </div>
-                    </div>
                     
-                    <!-- Search results -->
-                    <div id="mobileSearchResults">
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Leveling</div>
-                                <div class="search-result-meta">Chugong • Action, Fantasy</div>
+                    <!-- Toggler for mobile -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>  
+                <!-- Nav items -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link" href="home.html">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Thể loại
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="comics-by-genre.html">Action</a></li>
+                                <li><a class="dropdown-item" href="comics-by-genre.html">Romance</a></li>
+                                <li><a class="dropdown-item" href="comics-by-genre.html">Comedy</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="following-comics.html">Theo dõi</a>
+                        </li>
+                    </ul>
+
+                    <!-- Search bar (hidden on mobile) -->
+                    <div class="search-container d-none d-lg-block flex-grow-1 mx-4">
+                        <i class="search-icon bi bi-search" ></i>
+                        <input type="text" class="search-input form-control" id="searchInput" placeholder="Tìm theo tên truyện, tên tác giả">
+                        
+                        <!-- Search dropdown -->
+                        <div class="search-dropdown" id="searchDropdown">
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">Solo Leveling</div>
+                                    <div class="search-result-meta">Chugong • Action, Fantasy</div>
+                                </div>
+                            </div>
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">Solo Bug Player</div>
+                                    <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
+                                </div>
+                            </div>
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">The Lone Necromancer</div>
+                                    <div class="search-result-meta">JJJ • Supernatural</div>
+                                </div>
+                            </div>
+                            <div class="search-footer">
+                                <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
                             </div>
                         </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Bug Player</div>
-                                <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
+                    </div>
+
+                    <!-- User avatar and logout (logged in state) -->
+                    <div class="d-flex align-items-center gap-3" id="userSection">
+                        <a href="profile.html" class="avatar-button" title="Trang cá nhân">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="User Avatar">
+                        </a>
+                        <button class="btn-logout" onclick="handleLogout()">
+                            Đăng xuất
+                        </button>
+                    </div>
+
+                    <!-- Auth buttons (not logged in state - hidden by default) -->
+                    <div class="d-none align-items-center gap-2" id="authButtons">
+                        <button class="btn-login" onclick="showLoginForm()">Đăng nhập</button>
+                        <button class="btn-signup">Đăng ký</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- Mobile Search Modal -->
+        <div class="modal fade mobile-search-modal" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mobileSearchModalLabel" style="color: white; font-weight: 600;">Tìm kiếm</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Search input -->
+                        <div class="mobile-search-input-wrapper">
+                            <div class="search-container" style="max-width: 100%;">
+                                <i class="search-icon bi bi-search"></i>
+                                <input type="text" class="search-input form-control" id="mobileSearchInput" placeholder="Search manga, authors, studios...">
                             </div>
                         </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">The Lone Necromancer</div>
-                                <div class="search-result-meta">JJJ • Supernatural</div>
+                        
+                        <!-- Search results -->
+                        <div id="mobileSearchResults">
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">Solo Leveling</div>
+                                    <div class="search-result-meta">Chugong • Action, Fantasy</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="search-footer">
-                            <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">Solo Bug Player</div>
+                                    <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
+                                </div>
+                            </div>
+                            <div class="search-result-item">
+                                <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
+                                <div class="search-result-info">
+                                    <div class="search-result-title">The Lone Necromancer</div>
+                                    <div class="search-result-meta">JJJ • Supernatural</div>
+                                </div>
+                            </div>
+                            <div class="search-footer">
+                                <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Main content -->
     <div class="container py-5" style="position: relative; z-index: 10; min-height: calc(100vh - 100px); display: flex; align-items: center;">
         <div class="row justify-content-center w-100">
             <div class="col-12">
-                <!-- OTP Card -->
                 <div class="otp-card mx-auto">
                     <div class="text-center">
-                        <!-- Icon -->
                         <div class="otp-icon mx-auto">
-                            <span class="material-symbols-outlined" style="font-size: 2.75rem;">lock_open</span>
+                            <i class="bi bi-unlock"></i>
                         </div>
-
-                        <!-- Header -->
                         <div class="otp-header">
                             <h1>Nhập mã xác thực</h1>
                             <p>Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã gồm 6 chữ số bên dưới.</p>
                         </div>
 
-                        <!-- Form -->
                         <form id="otpForm" onsubmit="event.preventDefault(); verifyOTP();">
-                            <!-- OTP Inputs -->
+                            <!-- FIX: type="text" thay vì type="number" -->
                             <div class="otp-inputs">
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0" autofocus>
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1">
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2">
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3">
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4">
-                                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5">
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="0" autocomplete="off" autofocus>
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="1" autocomplete="off">
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="2" autocomplete="off">
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="3" autocomplete="off">
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="4" autocomplete="off">
+                                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" data-index="5" autocomplete="off">
                             </div>
 
-                            <!-- Submit button -->
-                            <button type="submit" class="btn-verify">
-                                Xác minh
-                            </button>
+                            <button type="submit" class="btn-verify">Xác minh</button>
                         </form>
 
-                        <!-- Resend section -->
                         <div class="resend-section">
                             <p>Không nhận được mã?</p>
-                            <div class="timer-box">
-                                <span class="material-symbols-outlined">timer</span>
+                            <div class="timer-box" id="timerBox">
+                                <i class="bi bi-stopwatch"></i>
                                 <span class="timer-text">Gửi lại mã sau</span>
-                                <span class="timer-countdown" id="countdown">00:59</span>
+                                <span class="timer-countdown" id="countdown">01:00</span>
                             </div>
-                            
-                            <!-- Back link -->
                             <div class="mt-4">
                                 <a href="forgot-password.html" class="back-link">
-                                    <span class="material-symbols-outlined">arrow_back</span>
+                                    <i class="bi bi-arrow-left-short"></i>
                                     Quay lại nhập email
                                 </a>
                             </div>
@@ -458,125 +414,165 @@
         </div>
     </div>
 
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="../static/js/navbar-client.js"></script>
-    <!-- OTP Input Logic -->
     <script>
-        // OTP input auto-focus and auto-submit
         const otpInputs = document.querySelectorAll('.otp-input');
-        
+
         otpInputs.forEach((input, index) => {
-            // Handle input
-            input.addEventListener('input', function(e) {
-                const value = this.value;
-                
-                // Only allow single digit
-                if (value.length > 1) {
-                    this.value = value.slice(0, 1);
-                }
-                
-                // Move to next input
-                if (value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-                
-                // Auto-submit when all filled
-                if (index === otpInputs.length - 1 && value.length === 1) {
-                    const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
-                    if (allFilled) {
-                        // Optional: auto-submit after a short delay
-                        // setTimeout(() => verifyOTP(), 300);
-                    }
-                }
-            });
-            
-            // Handle backspace
+
+            // FIX: Chặn ký tự không phải số ngay tại keydown
             input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
-                    otpInputs[index - 1].focus();
-                    otpInputs[index - 1].value = '';
+                // Cho phép: Backspace, Delete, ArrowLeft, ArrowRight, Tab
+                const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+                if (allowedKeys.includes(e.key)) {
+                    if (e.key === 'Backspace') {
+                        e.preventDefault();
+                        this.value = '';
+                        this.classList.remove('filled');
+                        if (index > 0) otpInputs[index - 1].focus();
+                    }
+                    if (e.key === 'ArrowLeft' && index > 0) otpInputs[index - 1].focus();
+                    if (e.key === 'ArrowRight' && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+                    return;
                 }
-                
-                // Handle arrow keys
-                if (e.key === 'ArrowLeft' && index > 0) {
-                    otpInputs[index - 1].focus();
+
+                // Chặn nếu không phải chữ số
+                if (!/^\d$/.test(e.key)) {
+                    e.preventDefault();
+                    return;
                 }
-                if (e.key === 'ArrowRight' && index < otpInputs.length - 1) {
+
+                // FIX: Ghi đè giá trị cũ thay vì nối chuỗi
+                e.preventDefault();
+                this.value = e.key;
+                this.classList.add('filled');
+                this.classList.remove('error');
+
+                // Chuyển sang ô tiếp theo
+                if (index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
             });
-            
-            // Handle paste
+
+            // FIX: Ngăn input mặc định gây trùng lặp (dùng keydown để xử lý rồi)
+            input.addEventListener('input', function() {
+                // Chỉ giữ 1 ký tự số, xoá phần còn lại
+                this.value = this.value.replace(/\D/g, '').slice(0, 1);
+                if (this.value) {
+                    this.classList.add('filled');
+                } else {
+                    this.classList.remove('filled');
+                }
+            });
+
+            // Focus: chọn toàn bộ nội dung để ghi đè dễ hơn
+            input.addEventListener('focus', function() {
+                this.select();
+            });
+
+            // FIX: Xử lý paste đúng cách — hỗ trợ paste ít hơn 6 ký tự
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
                 const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
-                
-                if (pastedData.length === 6) {
-                    otpInputs.forEach((input, i) => {
-                        input.value = pastedData[i] || '';
-                    });
-                    otpInputs[5].focus();
+                if (!pastedData) return;
+
+                // Điền từ vị trí hiện tại trở đi
+                for (let i = 0; i < pastedData.length && (index + i) < otpInputs.length; i++) {
+                    otpInputs[index + i].value = pastedData[i];
+                    otpInputs[index + i].classList.add('filled');
+                    otpInputs[index + i].classList.remove('error');
                 }
+
+                // Focus vào ô tiếp theo sau đoạn paste, hoặc ô cuối
+                const nextIndex = Math.min(index + pastedData.length, otpInputs.length - 1);
+                otpInputs[nextIndex].focus();
             });
         });
-        
-        // Verify OTP function
+
+        // Verify OTP
         function verifyOTP() {
             const otp = Array.from(otpInputs).map(input => input.value).join('');
-            
-            if (otp.length === 6) {
-                console.log('Verifying OTP:', otp);
-                // Add your verification logic here
-                alert('Đang xác thực mã OTP: ' + otp);
-                // window.location.href = 'success.html';
-            } else {
-                alert('Vui lòng nhập đầy đủ 6 chữ số!');
+
+            if (otp.length < 6) {
+                // Highlight ô còn trống
+                otpInputs.forEach(input => {
+                    if (!input.value) {
+                        input.classList.add('error');
+                    }
+                });
+                // Focus vào ô trống đầu tiên
+                const firstEmpty = Array.from(otpInputs).find(input => !input.value);
+                if (firstEmpty) firstEmpty.focus();
+                return;
             }
+
+            console.log('Verifying OTP:', otp);
+            alert('Đang xác thực mã OTP: ' + otp);
+            // window.location.href = 'success.html';
         }
-        
+
         // Countdown timer
-        let timeLeft = 59;
-        const countdownElement = document.getElementById('countdown');
-        
+        let timeLeft = 60;
+        const countdownEl = document.getElementById('countdown');
+        const timerBox = document.getElementById('timerBox');
+
         const timer = setInterval(() => {
             timeLeft--;
-            
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            
-            countdownElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            
+            countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                // Enable resend button
-                const timerBox = document.querySelector('.timer-box');
                 timerBox.innerHTML = `
-                    <button class="btn btn-link text-decoration-none p-0" style="color: var(--primary); font-weight: 700;" onclick="resendOTP()">
-                        Gửi lại mã
+                    <button type="button" class="btn btn-link text-decoration-none p-0" 
+                            style="color: var(--primary); font-weight: 700; font-size: 0.875rem;"
+                            onclick="resendOTP()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã
                     </button>
                 `;
             }
         }, 1000);
-        
-        // Resend OTP function
+
+        // Resend OTP
         function resendOTP() {
-            console.log('Resending OTP...');
-            alert('Đã gửi lại mã OTP!');
-            
-            // Reset countdown
-            timeLeft = 59;
-            const timerBox = document.querySelector('.timer-box');
+            // Xoá tất cả ô
+            otpInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled', 'error');
+            });
+            otpInputs[0].focus();
+
+            // Reset timer
+            timeLeft = 60;
             timerBox.innerHTML = `
-                <span class="material-symbols-outlined">timer</span>
+                <i class="bi bi-stopwatch"></i>
                 <span class="timer-text">Gửi lại mã sau</span>
-                <span class="timer-countdown" id="countdown">00:59</span>
+                <span class="timer-countdown" id="countdown">01:00</span>
             `;
-            
+
             // Restart timer
-            location.reload();
+            const newCountdownEl = document.getElementById('countdown');
+            const newTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                newCountdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(newTimer);
+                    timerBox.innerHTML = `
+                        <button type="button" class="btn btn-link text-decoration-none p-0"
+                                style="color: var(--primary); font-weight: 700; font-size: 0.875rem;"
+                                onclick="resendOTP()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Gửi lại mã
+                        </button>
+                    `;
+                }
+            }, 1000);
+
+            alert('Đã gửi lại mã OTP!');
         }
     </script>
 </body>

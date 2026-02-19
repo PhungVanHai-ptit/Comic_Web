@@ -294,9 +294,10 @@
             background-color: rgba(140, 37, 244, 0.1);
         }
 
-        .btn-mobile-search .material-symbols-outlined {
+        .bi{
             font-size: 1.25rem;
         }
+        
 
         /* Mobile search modal */
         .mobile-search-modal .modal-content {
