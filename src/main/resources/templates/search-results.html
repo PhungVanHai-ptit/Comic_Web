@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${keyword != null and !keyword.isEmpty()} ? 'Kết quả tìm kiếm - ' + ${keyword} : 'Tìm kiếm'">MangaRead - Tìm kiếm</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <style>
+        .search-header {
+            padding: 2rem 0 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .search-title { font-size: 1.75rem; font-weight: 700; }
+        @media (min-width: 768px) { .search-title { font-size: 2rem; } }
+        .search-keyword { color: var(--primary); }
+        .search-count   { color: var(--text-secondary); font-size: 0.875rem; }
+
+        .manga-card { cursor: pointer; text-decoration: none; color: inherit; display: block; }
+
+        .manga-thumbnail {
+            position: relative;
+            aspect-ratio: 2/3;
+            border-radius: 0.65rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .manga-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .manga-card:hover .manga-thumbnail img { transform: scale(1.08); }
+
+        .manga-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .manga-card:hover .manga-overlay { opacity: 0.9; }
+
+        .manga-info { margin-top: 0.45rem; padding: 0 0.1rem; }
+
+        .manga-title-below {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.25rem;
+            transition: color 0.2s;
+        }
+        .manga-card:hover .manga-title-below { color: var(--primary); }
+
+        .manga-stats-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary, #94a3b8);
+            font-size: 0.72rem;
+        }
+        .manga-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .manga-stat .bi { font-size: 0.78rem; }
+        .manga-stat .bi-eye { color: var(--primary); }
+        .manga-stat .bi-heart-fill { color: var(--primary); }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary, #94a3b8);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
+            background-color: rgba(255,255,255,0.04);
+            transition: background-color 0.15s;
+            margin-top: 0.25rem;
+            text-decoration: none;
+        }
+        .chapter-item:hover {
+            background-color: rgba(114,7,222,0.1);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .cover-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d1b47 0%, #1a0e2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cover-placeholder i { font-size: 2rem; color: rgba(140,37,244,0.5); }
+
+        .pagination-info { color: var(--text-secondary); font-size: 0.875rem; }
+        .pagination-info span { color: white; font-weight: 600; }
+        .pagination { gap: 0.25rem; margin: 0; }
+
+        .page-link {
+            color: var(--text-secondary);
+            background-color: transparent;
+            border: 1px solid transparent;
+            min-width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            padding: 0 0.5rem;
+        }
+
+        .page-link:hover {
+            color: white;
+            background-color: var(--border-dark);
+            border-color: transparent;
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(140,37,244,0.35);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.35;
+            background-color: transparent;
+            border-color: transparent;
+            color: var(--text-secondary);
+        }
+        .btn-primary-custom {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #5a0fc8; /* hoặc darken tùy bạn */
+            border-color: #5a0fc8;
+            color: #fff;
+        }
+
+        .footer {
+            background-color: #130c1a;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 2.5rem 1rem;
+            margin-top: 3rem;
+        }
+        .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .footer a:hover { color: white; }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/navbar-client :: navbarClient}"></div>
+
+    <main class="container-fluid px-3 px-md-4 py-4" style="max-width: 1280px;">
+
+        <div class="search-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h1 class="search-title mb-0" th:if="${keyword != null and !keyword.isEmpty()}">
+                    Kết quả cho "<span class="search-keyword" th:text="${keyword}">...</span>"
+                </h1>
+                <h1 class="search-title mb-0" th:unless="${keyword != null and !keyword.isEmpty()}">
+                    Tìm kiếm truyện
+                </h1>
+                <div class="search-count">
+                    Có <span th:text="${totalElements ?: 0}">0</span> kết quả
+                </div>
+            </div>
+        </div>
+
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-3 g-md-4" th:if="${comics != null and !comics.isEmpty()}">
+            <div class="col" th:each="comic : ${comics}">
+                <div class="manga-card">
+                    <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="text-decoration-none">
+                        <div class="manga-thumbnail">
+                            <th:block th:if="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                                <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}" th:alt="${comic.title}">
+                            </th:block>
+                            <th:block th:unless="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                                <div class="cover-placeholder">
+                                    <i class="bi bi-book-fill"></i>
+                                </div>
+                            </th:block>
+                            <div class="manga-overlay"></div>
+                        </div>
+                        <div class="manga-info">
+                            <div class="manga-title-below" th:text="${comic.title}">Tên truyện</div>
+                            <div class="manga-stats-row">
+                                <span class="manga-stat">
+                                    <i class="bi bi-eye"></i>
+                                    <span th:text="${#numbers.formatInteger(comic.totalViews ?: 0, 0, 'COMMA')}">0</span>
+                                </span>
+                                <span class="manga-stat">
+                                    <i class="bi bi-heart-fill"></i>
+                                    <span th:text="${#numbers.formatInteger(comic.totalFollows ?: 0, 0, 'COMMA')}">0</span>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                    <th:block th:if="${comic.chapters != null and !comic.chapters.isEmpty()}">
+                        <a th:href="@{/comic-reading/{id}(id=${comic.chapters[0].chapterId})}"
+                           class="chapter-item text-decoration-none">
+                            <span th:text="'Ch. ' + ${comic.chapters[0].chapterNum.stripTrailingZeros().toPlainString()}">Ch. 1</span>
+                            <span class="chap-time" th:attr="data-time=${comic.lastChapterAt}">...</span>
+
+                        </a>
+                    </th:block>
+
+                    <th:block th:unless="${comic.chapters != null and !comic.chapters.isEmpty()}">
+                        <span class="chapter-item" style="cursor:default;">
+                            <span>Chưa có chapter</span>
+                        </span>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center py-5" th:if="${comics == null or comics.isEmpty()}">
+            <i class="bi bi-search" style="font-size:4rem; opacity:0.3; color: var(--text-secondary);"></i>
+            <p class="mt-3 text-secondary" th:if="${keyword != null and !keyword.isEmpty()}">
+                Không tìm thấy truyện nào cho "<strong th:text="${keyword}" style="color: white;">...</strong>"
+            </p>
+            <p class="mt-3 text-secondary" th:unless="${keyword != null and !keyword.isEmpty()}">
+                Vui lòng nhập từ khóa tìm kiếm
+            </p>
+            <a th:href="@{/}" class="btn btn-primary-custom mt-3">
+                <i class="bi bi-house"></i> Quay về trang chủ
+            </a>
+        </div>
+
+        <div class="border-top mt-5 pt-4" style="border-color: var(--border-dark) !important;" th:if="${totalPages > 1}">
+            <div class="row align-items-center">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    <p class="pagination-info mb-0">
+                        Hiển thị <span th:text="${currentPage * 20 + 1}">1</span>–<span th:text="${T(java.lang.Math).min((currentPage + 1) * 20, totalElements)}">20</span> trong tổng số <span th:text="${totalElements}">0</span> kết quả
+                    </p>
+                </div>
+                <div class="col-sm-6">
+                    <nav>
+                        <ul class="pagination justify-content-sm-end mb-0" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="mx-auto d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style="max-width: 1280px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-book" style="color: var(--primary); font-size: 1.25rem;"></i>
+                    <span class="fw-bold">MangaRead</span>
+                </div>
+                <div class="d-flex gap-4">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">DMCA</a>
+                    <a href="#">Liên hệ</a>
+                </div>
+                <div style="font-size:0.75rem; opacity:0.6;">© 2024 MangaRead. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/navbar-client.js"></script>
+    <script th:inline="javascript">
+        const TOTAL_PAGES = /*[[${totalPages}]]*/ 0;
+        let currentPage = /*[[${currentPage}]]*/ 0;
+        const KEYWORD = /*[[${keyword}]]*/ '';
+
+        function relativeTime(isoStr) {
+            if (!isoStr) return '';
+            var d = new Date(isoStr);
+            var now = new Date();
+            var diffMs = now - d;
+            var diffSec = Math.floor(diffMs / 1000);
+            var diffMin = Math.floor(diffSec / 60);
+            var diffHour = Math.floor(diffMin / 60);
+            var diffDay = Math.floor(diffHour / 24);
+            if (diffSec < 60)  return 'Vừa xong';
+            if (diffMin < 60)  return diffMin + ' phút trước';
+            if (diffHour < 24) return diffHour + ' giờ trước';
+            if (diffDay < 7)   return diffDay + ' ngày trước';
+            var dd = String(d.getDate()).padStart(2,'0');
+            var mm = String(d.getMonth()+1).padStart(2,'0');
+            var yyyy = d.getFullYear();
+            return dd + '/' + mm + '/' + yyyy;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.chap-time[data-time]').forEach(function (el) {
+                el.textContent = relativeTime(el.getAttribute('data-time'));
+            });
+        });
+
+        function renderPagination(page) {
+            const ul = document.getElementById('pagination');
+            if (!ul || TOTAL_PAGES <= 1) return;
+            ul.innerHTML = '';
+
+            const addItem = (label, pageNum, disabled = false, active = false, isIcon = false) => {
+                const li = document.createElement('li');
+                li.className = `page-item${disabled ? ' disabled' : ''}${active ? ' active' : ''}`;
+                const a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                if (isIcon) a.innerHTML = label; else a.textContent = label;
+                if (!disabled) {
+                    a.addEventListener('click', e => {
+                        e.preventDefault();
+                        window.location.href = `/search?keyword=${encodeURIComponent(KEYWORD)}&page=${pageNum}`;
+                    });
+                }
+                li.appendChild(a);
+                ul.appendChild(li);
+            };
+
+            const addEllipsis = () => {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = '<span class="page-link" style="cursor:default;">...</span>';
+                ul.appendChild(li);
+            };
+
+            addItem('<i class="bi bi-chevron-left"></i>', page - 1, page === 0, false, true);
+
+            if (TOTAL_PAGES <= 7) {
+                for (let i = 0; i < TOTAL_PAGES; i++) addItem(i + 1, i, false, i === page);
+            } else {
+                addItem(1, 0, false, page === 0);
+                if (page > 2) addEllipsis();
+                const start = Math.max(1, page - 1);
+                const end = Math.min(TOTAL_PAGES - 2, page + 1);
+                for (let i = start; i <= end; i++) addItem(i + 1, i, false, i === page);
+                if (page < TOTAL_PAGES - 3) addEllipsis();
+                addItem(TOTAL_PAGES, TOTAL_PAGES - 1, false, page === TOTAL_PAGES - 1);
+            }
+
+            addItem('<i class="bi bi-chevron-right"></i>', page + 1, page === TOTAL_PAGES - 1, false, true);
+        }
+
+        renderPagination(currentPage);
+    </script>
+</body>
+</html>

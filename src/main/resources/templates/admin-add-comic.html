@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MangaRead Admin - Thêm truyện mới</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/admin.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8c25f4;
+            --primary-dark: #7a1fd6;
+            --background-dark: #191022;
+            --surface-dark: #241a30;
+            --surface-border: #3a2d4a;
+            --secondary-text: #ad90cb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-dark);
+            color: white;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .btn-add-comic {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.6rem;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 18px rgba(140, 37, 244, 0.25);
+        }
+
+        .btn-add-comic:hover {
+            background-color: #7a1fd6; /* tím đậm hơn */
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(140, 37, 244, 0.35);
+        }
+
+        .btn-add-comic:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(140, 37, 244, 0.25);
+        }
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* Form Card */
+        .form-card {
+            background-color: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--surface-border);
+            background-color: rgba(25, 16, 34, 0.3);
+        }
+
+        .form-card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-card-body {
+            padding: 2rem;
+        }
+
+        .form-card-footer {
+            padding: 1.5rem;
+            background-color: rgba(25, 16, 34, 0.2);
+            border-top: 1px solid var(--surface-border);
+        }
+
+        /* Form Inputs */
+        .form-label-custom {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select,
+        textarea {
+            background-color: var(--background-dark);
+            border: 1px solid var(--surface-border);
+            color: white;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control::placeholder,
+        textarea::placeholder {
+            color: rgba(173, 144, 203, 0.3);
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        textarea:focus {
+            background-color: var(--background-dark);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(140, 37, 244, 0.25);
+        }
+
+        .form-select option {
+            background-color: var(--surface-dark);
+            color: white;
+        }
+
+        /* Cover Display */
+        .cover-preview {
+            position: relative;
+            aspect-ratio: 3/4;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: var(--background-dark);
+            border: 1px solid var(--surface-border);
+        }
+
+        .cover-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .cover-preview:hover .cover-overlay {
+            opacity: 1;
+        }
+
+        /* Genre Checkboxes */
+        .genre-wrapper {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background-color: var(--background-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+        }
+
+        .genre-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-track {
+            background: var(--background-dark);
+            border-radius: 10px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-thumb {
+            background: var(--surface-border);
+            border-radius: 10px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .genre-checkbox {
+            display: none;
+        }
+
+        .genre-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background-color: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .genre-label:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(140, 37, 244, 0.3);
+        }
+
+        .genre-checkbox:checked + .genre-label {
+            background-color: rgba(140, 37, 244, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .genre-checkbox:checked + .genre-label i {
+            color: var(--primary);
+        }
+
+        /* Helper Text */
+        .form-text-custom {
+            font-size: 0.625rem;
+            color: rgba(173, 144, 203, 0.6);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <a th:href="@{/admin/comics}" class="btn-back">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h2 class="page-title">Thêm truyện mới</h2>
+                            <p class="page-subtitle">Tạo một mục mới trong thư viện</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" form="addComicForm" class="btn btn-add-comic">
+                        <i class="bi bi-cloud-upload me-2"></i>
+                        Xuất bản
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <form id="addComicForm" th:action="@{/admin/comics/add}" method="post" enctype="multipart/form-data" th:object="${comic}" class="mx-auto" style="max-width: 1200px;">
+                    <!-- Form Card -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">
+                                <i class="bi bi-info-circle text-primary"></i>
+                                Thông tin truyện
+                            </h3>
+                        </div>
+
+                        <div class="form-card-body">
+                            <div class="row g-4">
+                                <!-- Cover Preview -->
+                                <div class="col-lg-3">
+                                    <label class="form-label-custom">Ảnh bìa</label>
+                                    <div class="cover-preview mb-3" id="coverPreview" style="cursor: pointer;" title="Nhấn để đổi ảnh">
+                                        <img id="coverImage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwBRZ5j7-Ajat1PmWhI2jbCJ9Tls4IPWe4L5lLX81XT1vL90wPr9ZGTAPBqp7L-2k10yBdu5cagUejnr3NghVa9BublAHgIx-Axf9ExipXr2_LVbjsncefOJAnEV7y4v6v36Pmv1KdR4pg-z1lGbwHPX4rECDPod7b9sZQ-DCG74w2t6RYjBjV4iyk0ltvsifLOZIL95fID-LtV_pzOIBDh66TTDbqLjtIBvp0rfh_U5hLJ7Ds-Ru_fbFeLXv_r7tWHJ2JW4EuKEm_I" alt="Solo Leveling">
+                                        <div class="cover-overlay">
+                                            <i class="bi bi-pencil text-white" style="font-size: 2rem;"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="coverFileInput" name="coverFile" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-outline-secondary w-100" id="changeCoverBtn">
+                                        <i class="bi bi-upload me-2"></i>
+                                        Đổi ảnh
+                                    </button>
+                                </div>
+
+                                <!-- Form Fields -->
+                                <div class="col-lg-9">
+                                    <div class="row g-3">
+                                        <!-- Title -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Tên truyện <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tên truyện..." required>
+                                        </div>
+
+                                        <!-- Author -->
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Tác giả</label>
+                                            <input type="text" class="form-control" th:field="*{author}" placeholder="Nhập tên tác giả...">
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Trạng thái</label>
+                                            <select class="form-select" th:field="*{status}">
+                                                <option value="Đang ra">Đang ra</option>
+                                                <option value="Hoàn thành">Hoàn thành</option>
+                                                <option value="Dropped">Dropped</option>
+                                            </select>
+                                        </div>
+
+
+                                        <!-- Genres (Checkboxes) -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Thể loại</label>
+                                            <div class="genre-wrapper">
+                                                    <div th:each="genre : ${genres}">
+                                                        <input type="checkbox" class="genre-checkbox" 
+                                                               th:id="'genre-' + ${genre.genreId}" 
+                                                               name="genreIds" 
+                                                               th:value="${genre.genreId}">
+                                                        <label class="genre-label" th:for="'genre-' + ${genre.genreId}">
+                                                            <i class="bi bi-check-circle"></i>
+                                                            <span th:text="${genre.name}"></span>
+                                                        </label>
+                                                    </div>
+                                            </div>
+                                            <p class="form-text-custom">Chọn một hoặc nhiều thể loại phù hợp với truyện</p>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Mô tả</label>
+                                            <textarea class="form-control" th:field="*{description}" rows="6" placeholder="Nhập tóm tắt cốt truyện và chi tiết..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== COVER IMAGE UPLOAD ====================
+        
+        // Get elements
+        const coverImage = document.getElementById('coverImage');
+        const coverFileInput = document.getElementById('coverFileInput');
+        const changeCoverBtn = document.getElementById('changeCoverBtn');
+        const coverPreview = document.getElementById('coverPreview');
+
+        // Click button to open file picker
+        changeCoverBtn.addEventListener('click', function() {
+            coverFileInput.click();
+        });
+
+        // Handle file upload
+        coverFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file ảnh!');
+                    return;
+                }
+
+                // Validate file size (max 1MB)
+                if (file.size > 1024 * 1024) {
+                    alert('Kích thước file không được vượt quá 1MB!');
+                    coverFileInput.value = '';
+                    return;
+                }
+
+                // Read and display image
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    coverImage.src = event.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+
+        // Click on cover preview to change image
+        coverPreview.addEventListener('click', function() {
+            coverFileInput.click();
+        });
+        
+        
+        // hightlight sidebar
+        const currentPage = window.location.pathname.split("/").pop();
+        let pageType = "comic";
+        if (currentPage.includes("comic") || currentPage.includes("chap")) {
+            pageType = "comic";
+        } else if (currentPage.includes("genre")) {
+            pageType = "genre";
+        } else if (currentPage.includes("user")) {
+            pageType = "user";
+        }
+        document.querySelectorAll(".nav-link-custom").forEach(link => {
+            const linkPage = link.getAttribute("href");
+
+            if (linkPage.includes(pageType)) {
+                link.classList.add("active");
+            }
+        });
+    </script>
+</body>
+</html>

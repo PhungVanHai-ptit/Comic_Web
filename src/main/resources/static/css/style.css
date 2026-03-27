@@ -1,0 +1,49 @@
+:root {
+    --primary: #8c25f4;
+    --primary-dark: #7a1fd6;
+    --background-light: #f7f5f8;
+    --background-dark: #191022;
+    --card-dark: #251b2e;
+    --border-dark: #362249;
+    --surface-border: #3a2d4a;
+    --surface-dark: #261834;
+    --text-secondary: #ad90cb;
+}
+
+body {
+    font-family: var(--bs-body-font-family);
+    background-color: var(--background-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background blur effects */
+.bg-blur-container {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.blur-circle-1 {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    background: rgba(140, 37, 244, 0.1);
+    filter: blur(120px);
+}
+
+.blur-circle-2 {
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    background: rgba(140, 37, 244, 0.1);
+    filter: blur(120px);
+}

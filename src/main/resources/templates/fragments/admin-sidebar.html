@@ -1,0 +1,64 @@
+<th:block th:fragment="sidebar">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a th:href="@{/}" class="brand">
+                <div class="brand-icon"><i class="bi bi-book"></i></div>
+                <h1 class="brand-title">MangaRead</h1>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <a th:href="@{/admin/comics}" class="nav-link-custom">
+                <i class="bi bi-collection"></i><span>Comics</span>
+            </a>
+            <a th:href="@{/admin/users}" class="nav-link-custom">
+                <i class="bi bi-people"></i><span>Users</span>
+            </a>
+            <a th:href="@{/admin/genres}" class="nav-link-custom">
+                <i class="bi bi-grid"></i><span>Genres</span>
+            </a>
+            <a th:href="@{/admin/comments}" class="nav-link-custom">
+                <i class="bi bi-chat-dots"></i><span>Comments</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post" class="w-100">
+                <div class="admin-profile text-decoration-none mb-2">
+                    <div class="admin-avatar" th:text="${#authentication.name != 'anonymousUser' ? #strings.substring(#authentication.name, 0, 2).toUpperCase() : 'AD'}">SA</div>
+                    <div class="admin-info">
+                        <p class="admin-name" th:text="${#authentication.name != 'anonymousUser' ? #authentication.name : 'Admin'}">Admin</p>
+                        <p class="admin-role">Administrator</p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            let pageType = "";
+            if (currentPath.includes("comic") || currentPath.includes("chap")) {
+                pageType = "comic";
+            } else if (currentPath.includes("genre")) {
+                pageType = "genre";
+            } else if (currentPath.includes("user")) {
+                pageType = "user";
+            } else if (currentPath.includes("comment")) {
+                pageType = "comment";
+            }
+            if (pageType) {
+                document.querySelectorAll(".nav-link-custom").forEach(link => {
+                    const linkPage = link.getAttribute("href");
+                    if (linkPage && linkPage.includes(pageType)) {
+                        link.classList.add("active");
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            }
+        });
+    </script>
+</th:block>

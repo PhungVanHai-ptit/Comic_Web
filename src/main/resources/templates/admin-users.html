@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MangaRead Admin - Quản lý người dùng</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="/css/admin.css" rel="stylesheet">
+    
+    <style>
+        /* Specific styles for users page only */
+        .search-wrapper {
+            background-color: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            padding-left: 2.5rem;
+            background-color: var(--background-dark);
+            border: 1px solid var(--surface-border);
+            color: white;
+        }
+
+        .search-input::placeholder {
+            color: var(--secondary-text);
+        }
+
+        .search-input:focus {
+            background-color: var(--background-dark);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(140, 37, 244, 0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-text);
+        }
+
+        /* Table */
+        .table-wrapper {
+            background-color: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .table {
+            margin: 0;
+            color: white;
+        }
+
+        .table thead th {
+            background-color: rgba(25, 16, 34, 0.5);
+            border-bottom: 1px solid var(--surface-border);
+            color: var(--secondary-text);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(140, 37, 244, 0.08);
+            transform: translateX(4px);
+        }
+
+        .table tbody tr:hover .username {
+            color: var(--primary);
+        }
+
+        .table tbody tr:hover .user-avatar {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(140, 37, 244, 0.2);
+        }
+
+        .table tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .user-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--surface-border);
+        }
+
+        .username {
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Action Button */
+        .btn-action {
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            border-radius: 0.375rem;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--secondary-text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--surface-border);
+            background-color: rgba(25, 16, 34, 0.2);
+        }
+
+        .pagination .page-link {
+            background-color: transparent;
+            border: 1px solid var(--surface-border);
+            color: var(--secondary-text);
+            border-radius: 0.375rem;
+            margin: 0 0.125rem;
+            min-width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .pagination .page-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--surface-border);
+            color: white;
+        }
+
+        .pagination .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(140, 37, 244, 0.25);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #8c25f4;
+            border-color: #8c25f4;
+            color: white;
+            font-weight: 600;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: transparent;
+            border-color: var(--surface-border);
+            color: var(--secondary-text);
+            opacity: 0.5;
+        }
+
+        /* Modal */
+        .modal-content {
+            background-color: var(--surface-dark);
+            border: 1px solid var(--surface-border);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .modal-title {
+            color: white;
+        }
+
+        .modal-body {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--surface-border);
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: white;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div>
+                    <h2 class="page-title">Quản lý người dùng</h2>
+                    <p class="page-subtitle">Xem và quản lý tất cả người dùng đã đăng ký trên nền tảng</p>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="mx-auto" style="max-width: 1400px;">
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="search-wrapper">
+                        <form th:action="@{/admin/users}" method="get">
+                            <div class="position-relative d-flex gap-2">
+                                <div class="position-relative flex-grow-1">
+                                    <i class="bi bi-search search-icon"></i>
+                                    <input type="text" name="keyword" th:value="${keyword}" class="form-control search-input" placeholder="Tìm kiếm theo Tên hoặc Email..." style="padding-left: 2.5rem;">
+                                </div>
+                                <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center">Tìm kiếm</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="table-wrapper">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">User ID</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th style="width: 150px;">Ngày tham gia</th>
+                                        <th class="text-end" style="width: 100px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="user : ${users}">
+                                        <td><small class="text-secondary" th:text="'#' + ${user.userId}">#1</small></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://i.pravatar.cc/150'}" class="user-avatar" alt="Avatar">
+                                                <span class="username" th:text="${user.fullName ?: 'Không tên'}">Username</span>
+                                            </div>
+                                        </td>
+                                        <td><small class="text-secondary" th:text="${user.email}">email</small></td>
+                                        <td><small class="text-secondary" th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd-MM-yyyy HH:mm') : '-'}">Date</small></td>
+                                        <td>
+                                            <div class="d-flex justify-content-end">
+                                                <button class="btn-action" title="Xóa" data-bs-toggle="modal" data-bs-target="#deleteModal" th:data-user-id="${user.userId}" th:data-username="${user.fullName ?: user.email}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(users.content)}">
+                                        <td colspan="5" class="text-center text-secondary py-4">Không tìm thấy người dùng nào</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination-wrapper" th:if="${totalPages > 0}">
+                            <small class="text-secondary">
+                                Hiển thị <span class="text-white" th:text="${(currentPage * 10) + 1}">1</span> 
+                                đến <span class="text-white" th:text="${#lists.size(users) + (currentPage * 10)}">10</span> 
+                                trong tổng số <span class="text-white" th:text="${totalElements}"></span> người dùng
+                            </small>
+                            <nav aria-label="User pagination">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, keyword=${keyword})}" tabindex="-1">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                                        <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, keyword=${keyword})}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-flex align-items-start" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Cảnh báo!</strong> Hành động này không thể hoàn tác.
+                        </div>
+                    </div>
+                    <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+                    <div class="p-3 mb-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
+                        <div><strong class="text-primary" id="userIdToDelete">#8834</strong></div>
+                        <div class="mt-1"><small class="text-secondary" id="usernameToDelete">OtakuKing99</small></div>
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        Tất cả dữ liệu liên quan đến người dùng này sẽ bị xóa vĩnh viễn.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form id="deleteForm" method="post" action="">
+                        <button type="submit" class="btn btn-danger" id="confirmDelete">
+                            <i class="bi bi-trash me-2"></i>
+                            Xóa người dùng
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Handle delete modal
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-user-id');
+            const username = button.getAttribute('data-username');
+            
+            document.getElementById('userIdToDelete').textContent = '#' + userId;
+            document.getElementById('usernameToDelete').textContent = username;
+            document.getElementById('deleteForm').action = '/admin/users/delete/' + userId;
+        });
+        
+        // hightlight sidebar
+        const currentPage = window.location.pathname.split("/").pop();
+        let pageType = "comic";
+        if (currentPage.includes("comic") || currentPage.includes("chap")) {
+            pageType = "comic";
+        } else if (currentPage.includes("genre")) {
+            pageType = "genre";
+        } else if (currentPage.includes("user")) {
+            pageType = "user";
+        }
+        document.querySelectorAll(".nav-link-custom").forEach(link => {
+            const linkPage = link.getAttribute("href");
+
+            if (linkPage.includes(pageType)) {
+                link.classList.add("active");
+            }
+        });
+    </script>
+</body>
+</html>

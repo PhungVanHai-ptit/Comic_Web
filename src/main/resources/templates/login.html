@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -9,8 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link href="../static/css/style.css" rel="stylesheet">
-    <link href="../static/css/navbar.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
     <style>
         
         /* Login card */
@@ -203,147 +203,7 @@
         <div class="blur-circle-2"></div>
     </div>
 
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid px-3 px-lg-5">
-            <!-- Brand -->
-            <a class="navbar-brand" href="home.html">
-                <i class="bi bi-book" style="color: var(--primary); font-size: 1.5rem; text-shadow:  1px 0 currentColor, -1px 0 currentColor, 0 1px currentColor, 0 -1px currentColor;"></i>
-                MangaRead
-            </a>
-            <!-- Mobile search and menu buttons -->
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                <!-- Mobile search button -->
-                <button class="btn-mobile-search" type="button" data-bs-toggle="modal" data-bs-target="#mobileSearchModal">
-                    <i class="bi bi-search"></i>
-                </button>
-                
-                <!-- Toggler for mobile -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>  
-            <!-- Nav items -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto ms-lg-4">
-                    <li class="nav-item">
-                        <a class="nav-link" href="home.html">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            Thể loại
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Action</a></li>
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Romance</a></li>
-                            <li><a class="dropdown-item" href="comics-by-genre.html">Comedy</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="following-comics.html">Theo dõi</a>
-                    </li>
-                </ul>
-
-                <!-- Search bar (hidden on mobile) -->
-                <div class="search-container d-none d-lg-block flex-grow-1 mx-4">
-                    <i class="search-icon bi bi-search" ></i>
-                    <input type="text" class="search-input form-control" id="searchInput" placeholder="Tìm theo tên truyện, tên tác giả">
-                    
-                    <!-- Search dropdown -->
-                    <div class="search-dropdown" id="searchDropdown">
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Leveling</div>
-                                <div class="search-result-meta">Chugong • Action, Fantasy</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Bug Player</div>
-                                <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">The Lone Necromancer</div>
-                                <div class="search-result-meta">JJJ • Supernatural</div>
-                            </div>
-                        </div>
-                        <div class="search-footer">
-                            <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- User avatar and logout (logged in state) -->
-                <div class="d-flex align-items-center gap-3" id="userSection">
-                    <a href="profile.html" class="avatar-button" title="Trang cá nhân">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="User Avatar">
-                    </a>
-                    <button class="btn-logout" onclick="handleLogout()">
-                        Đăng xuất
-                    </button>
-                </div>
-
-                <!-- Auth buttons (not logged in state - hidden by default) -->
-                <div class="d-none align-items-center gap-2" id="authButtons">
-                    <button class="btn-login" onclick="showLoginForm()">Đăng nhập</button>
-                    <button class="btn-signup">Đăng ký</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <!-- Mobile Search Modal -->
-    <div class="modal fade mobile-search-modal" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen-sm-down">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="mobileSearchModalLabel" style="color: white; font-weight: 600;">Tìm kiếm</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Search input -->
-                    <div class="mobile-search-input-wrapper">
-                        <div class="search-container" style="max-width: 100%;">
-                            <i class="search-icon bi bi-search"></i>
-                            <input type="text" class="search-input form-control" id="mobileSearchInput" placeholder="Search manga, authors, studios...">
-                        </div>
-                    </div>
-                    
-                    <!-- Search results -->
-                    <div id="mobileSearchResults">
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=100&h=100&fit=crop" alt="Solo Leveling" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Leveling</div>
-                                <div class="search-result-meta">Chugong • Action, Fantasy</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1612178537253-bccd437b730e?w=100&h=100&fit=crop" alt="Solo Bug Player" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">Solo Bug Player</div>
-                                <div class="search-result-meta">Cheongcho • Adventure, Isekai</div>
-                            </div>
-                        </div>
-                        <div class="search-result-item">
-                            <img src="https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=100&h=100&fit=crop" alt="The Lone Necromancer" class="search-result-thumbnail">
-                            <div class="search-result-info">
-                                <div class="search-result-title">The Lone Necromancer</div>
-                                <div class="search-result-meta">JJJ • Supernatural</div>
-                            </div>
-                        </div>
-                        <div class="search-footer">
-                            <a href="search-results.html">Xem tất cả kết quả cho "Solo"</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments/navbar-client :: navbarClient}"></div>
 
     <!-- Main content -->
     <div class="container py-5" style="position: relative; z-index: 10;">
@@ -357,33 +217,47 @@
                             <h2>Đăng nhập</h2>
                         </div>
 
-                        <!-- Form -->
-                        <form onsubmit="event.preventDefault();">
-                            <!-- Email field -->
+                        <!-- Thông báo lỗi khi sai email/mật khẩu -->
+                        <div th:if="${param.error}" class="alert alert-danger py-2 mb-3" role="alert">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            <span>Email hoặc mật khẩu không đúng.</span>
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-info py-2 mb-3" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Bạn đã đăng xuất.
+                        </div>
+                        <div th:if="${param.required}" class="alert alert-warning py-2 mb-3" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span>Vui lòng đăng nhập để sử dụng tính năng này.</span>
+                        </div>
+
+                        <!-- Form đăng nhập -->
+                        <form th:action="@{/auth/login}" method="post" id="loginForm">
+                            <!-- Email - Spring Security dùng name="username" -->
                             <div class="mb-4">
                                 <label for="email" class="form-label">Email</label>
                                 <div class="input-group-custom">
                                     <i class="input-icon bi bi-envelope"></i>
-                                    <input type="text" class="form-control form-control-custom" id="email" placeholder="Enter your email">
+                                    <input type="email" class="form-control form-control-custom" id="email" name="username" placeholder="Nhập email" required autocomplete="username">
                                 </div>
                             </div>
 
-                            <!-- Password field -->
+                            <!-- Mật khẩu -->
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <label for="password" class="form-label mb-0">Mật khẩu</label>
-                                    <a href="forgot-password.html" class="forgot-password">Quên mật khẩu?</a>
+                                    <a href="/auth/forgot-password" class="forgot-password">Quên mật khẩu?</a>
                                 </div>
                                 <div class="input-group-custom">
-                                    <i class="input-icon bi bi-lock "></i>
-                                    <input type="password" class="form-control form-control-custom" id="password" placeholder="Enter your password" style="padding-right: 2.5rem;">
+                                    <i class="input-icon bi bi-lock"></i>
+                                    <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="Nhập mật khẩu" style="padding-right: 2.5rem;" required autocomplete="current-password">
                                     <button type="button" class="password-toggle">
                                         <i class="bi bi-eye-slash"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Submit button -->
+                            <!-- Submit -->
                             <button type="submit" class="btn btn-primary-custom mt-2">
                                 <span>Đăng nhập</span>
                             </button>
@@ -394,7 +268,7 @@
                     <div class="card-footer-custom">
                         <p>
                             Bạn chưa có tài khoản?
-                            <a href="register.html" class="signup-link">Đăng ký ngay</a>
+                            <a href="/register" class="signup-link">Đăng ký ngay</a>
                         </p>
                     </div>
                 </div>
@@ -412,7 +286,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script src="../static/js/navbar-client.js"></script>
+    <script src="/js/navbar-client.js"></script>
     
     <!-- Toggle password visibility -->
     <script>
@@ -427,7 +301,7 @@
             } else {
                 passwordInput.type = 'password';
                 icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');n.textContent = 'visibility_off';
+                icon.classList.add('bi-eye-slash');
             }
         });
     </script>

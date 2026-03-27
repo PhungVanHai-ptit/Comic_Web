@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MangaRead Admin - Sửa thông tin truyện</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+     <link href="/css/admin.css" rel="stylesheet">
+    <style>
+        .btn-back { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: 1px solid var(--surface-border); background: none; color: var(--secondary-text); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-back:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
+        
+        /* Form Card */
+        .form-card { background-color: var(--surface-dark); border: 1px solid var(--surface-border); border-radius: 0.75rem; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        .form-card-header { padding: 1.5rem; border-bottom: 1px solid var(--surface-border); background-color: rgba(25, 16, 34, 0.3); }
+        .form-card-title { font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .form-card-body { padding: 2rem; }
+        .form-card-footer { padding: 1.5rem; background-color: rgba(25, 16, 34, 0.2); border-top: 1px solid var(--surface-border); }
+        .form-label-custom { font-size: 0.75rem; font-weight: 700; color: var(--secondary-text); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        
+        /* Cover Display */
+        .cover-preview { position: relative; aspect-ratio: 3/4; border-radius: 0.5rem; overflow: hidden; background-color: var(--background-dark); border: 1px solid var(--surface-border); }
+        .cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .cover-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+        .cover-preview:hover .cover-overlay { opacity: 1; }
+
+        /* Genre Checkboxes */
+        .genre-wrapper {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background-color: var(--background-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 0.5rem;
+        }
+
+        .genre-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-track {
+            background: var(--background-dark);
+            border-radius: 10px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-thumb {
+            background: var(--surface-border);
+            border-radius: 10px;
+        }
+
+        .genre-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        .genre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; }
+        .genre-checkbox { display: none; }
+        .genre-label { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background-color: var(--surface-dark); border: 1px solid var(--surface-border); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; font-size: 0.875rem; }
+        .genre-label:hover { background-color: rgba(255, 255, 255, 0.05); border-color: rgba(140, 37, 244, 0.3); }
+        .genre-checkbox:checked + .genre-label { background-color: rgba(140, 37, 244, 0.1); border-color: var(--primary); color: var(--primary); font-weight: 600; }
+        .genre-checkbox:checked + .genre-label i { color: var(--primary); }
+
+        /* Helper Text */
+        .form-text-custom {
+            font-size: 0.625rem;
+            color: rgba(173, 144, 203, 0.6);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .pagination .page-link {
+            background-color: transparent;
+            border: 1px solid var(--surface-border);
+            color: var(--secondary-text);
+            border-radius: 0.375rem;
+            margin: 0 0.125rem;
+            min-width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .pagination .page-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--surface-border);
+            color: white;
+        }
+
+        .pagination .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(140, 37, 244, 0.25);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #8c25f4;
+            border-color: #8c25f4;
+            color: white;
+            font-weight: 600;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: transparent;
+            border-color: var(--surface-border);
+            color: var(--secondary-text);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <a th:href="@{/admin/comics}" class="btn-back">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h2 class="page-title">Sửa thông tin truyện</h2>
+                            <p class="page-subtitle">Cập nhật metadata và quản lý danh sách chapter</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/admin/comics}" class="btn btn-outline-secondary">
+                            Hủy thay đổi
+                        </a>
+                        <button type="submit" form="editComicForm" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <form id="editComicForm" th:action="@{/admin/comics/edit/{id}(id=${comic.comicId})}" method="post" enctype="multipart/form-data" th:object="${comic}" class="mx-auto" style="max-width: 1200px;">
+                    <!-- Form Card -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">
+                                <i class="bi bi-info-circle text-primary"></i>
+                                Thông tin truyện
+                            </h3>
+                        </div>
+
+                        <div class="form-card-body">
+                            <div class="row g-4">
+                                <!-- Cover Preview -->
+                                <div class="col-lg-3">
+                                    <label class="form-label-custom">Ảnh bìa</label>
+                                    <div class="cover-preview mb-3" id="coverPreview" style="cursor: pointer;" title="Nhấn để đổi ảnh">
+                                        <img id="coverImage" th:src="${comic.coverImage != null ? (comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage) : '/images/default-cover.jpg'}" alt="Cover">
+                                        <div class="cover-overlay">
+                                            <i class="bi bi-pencil text-white" style="font-size: 2rem;"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="coverFileInput" name="coverFile" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-outline-secondary w-100" id="changeCoverBtn">
+                                        <i class="bi bi-upload me-2"></i>
+                                        Đổi ảnh
+                                    </button>
+                                </div>
+
+                                <!-- Form Fields -->
+                                <div class="col-lg-9">
+                                    <div class="row g-3">
+                                        <!-- Title -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Tên truyện <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" th:field="*{title}" required>
+                                        </div>
+
+                                        <!-- Author -->
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Tác giả</label>
+                                            <input type="text" class="form-control" th:field="*{author}">
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Trạng thái</label>
+                                            <select class="form-select" th:field="*{status}">
+                                                <option value="Đang ra">Đang ra</option>
+                                                <option value="Hoàn thành">Hoàn thành</option>
+                                                <option value="Dropped">Dropped</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Genres (Checkboxes) - Pre-selected -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Thể loại</label>
+                                            <div class="genre-wrapper">
+                                                    <div th:each="genre : ${genres}">
+                                                        <input type="checkbox" class="genre-checkbox" 
+                                                               th:id="'genre-' + ${genre.genreId}" 
+                                                               name="genreIds" 
+                                                               th:value="${genre.genreId}"
+                                                               th:checked="${comic.genres != null and #lists.contains(comic.genres, genre)}">
+                                                        <label class="genre-label" th:for="'genre-' + ${genre.genreId}">
+                                                            <i class="bi bi-check-circle"></i>
+                                                            <span th:text="${genre.name}"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            <p class="form-text-custom">Chọn một hoặc nhiều thể loại phù hợp với truyện</p>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="col-12">
+                                            <label class="form-label-custom">Mô tả</label>
+                                            <textarea class="form-control" th:field="*{description}" rows="6" placeholder="Nhập tóm tắt cốt truyện và chi tiết..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mx-auto" style="max-width: 1200px;">                    <!-- Chapters List Section -->
+                    <div class="form-card mt-4">
+                        <div class="form-card-body p-0">
+                            <div class="d-flex justify-content-between align-items-center p-3">
+                                <h3 class="form-card-title mb-0">
+                                    <i class="bi bi-list-ol text-primary"></i>
+                                    Danh sách chapters
+                                </h3>
+                                <div class="d-flex align-items-center gap-3">
+                                    <form th:action="@{/admin/comics/edit/{id}(id=${comic.comicId})}" method="get" class="d-flex align-items-center bg-dark rounded-pill px-2 border border-secondary" style="background-color: rgba(0,0,0,0.2) !important;">
+                                        <i class="bi bi-search text-secondary ms-1"></i>
+                                        <input type="number" name="chapterSearch" th:value="${chapterSearch}" step="0.01" class="form-control form-control-sm border-0 bg-transparent text-white shadow-none" placeholder="Tìm số chap..." style="width: 100px;">
+                                        <button type="submit" class="btn btn-sm text-primary p-1">
+                                            <i class="bi bi-arrow-right-circle-fill"></i>
+                                        </button>
+                                        <a th:href="@{/admin/comics/edit/{id}(id=${comic.comicId})}" class="btn btn-sm text-secondary p-1" th:if="${chapterSearch != null}">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                        </a>
+                                    </form>
+                                    <a th:href="@{/admin/comics/{comicId}/chapters/add(comicId=${comic.comicId})}" class="btn btn-sm btn-primary d-flex align-items-center justify-content-center px-3 py-2" th:if="${comic != null}" style="font-weight: 600;">
+                                        <i class="bi bi-plus-lg me-2"></i>
+                                        <span>Thêm chapter</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr style="background-color: rgba(25, 16, 34, 0.5); border-bottom: 1px solid var(--surface-border);">
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none; width: 80px;">#</th>
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none;">Tên chapter</th>
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none;">Ngày đăng</th>
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none;">Cập nhật</th>
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none;">Lượt xem</th>
+                                            <th style="color: var(--secondary-text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 1rem 1.5rem; border: none; text-align: right;">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="chapter : ${chapters}" style="border-bottom: 1px solid var(--surface-border);">
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle;">
+                                                <span class="badge" style="background-color: var(--primary); color: white; font-weight: 600;" 
+                                                      th:text="${chapter.chapterNum != null ? chapter.chapterNum.stripTrailingZeros().toPlainString() : '?'}">179</span>
+                                            </td>
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle;">
+                                                <div style="font-weight: 600;" th:text="${chapter.title != null and chapter.title != '' ? chapter.title : 'Chapter ' + (chapter.chapterNum != null ? chapter.chapterNum.stripTrailingZeros().toPlainString() : '?')}">Chapter 179</div>
+                                            </td>
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle;">
+                                                <small class="text-secondary" th:text="${#temporals.format(chapter.createdAt, 'dd/MM/yyyy')}">Dec 29, 2021</small>
+                                            </td>
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle;">
+                                                <small class="text-secondary" th:text="${chapter.updatedAt != null ? #temporals.format(chapter.updatedAt, 'dd/MM/yyyy') : '-'}">Dec 29, 2021</small>
+                                            </td>
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle;">
+                                                <small class="text-secondary" th:text="${chapter.views != null ? chapter.views + ' View' : '0 View'}">1.2M</small>
+                                            </td>
+                                            <td style="padding: 0.75rem 1.5rem; border: none; vertical-align: middle; text-align: right;">
+                                                <a th:href="@{/admin/comics/{comicId}/chapters/edit/{chapterId}(comicId=${comic.comicId}, chapterId=${chapter.chapterId})}" class="btn btn-sm btn-outline-secondary me-2" style="padding: 0.25rem 0.5rem;">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form th:action="@{/admin/comics/{comicId}/chapters/delete/{chapterId}(comicId=${comic.comicId}, chapterId=${chapter.chapterId})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này không? Toàn bộ ảnh sẽ bị xóa vĩnh viễn!');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 0.25rem 0.5rem;" title="Xóa chapter">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(chapters)}">
+                                            <td colspan="6" class="text-center text-muted" style="padding: 2rem;">Chưa có chapter nào ở truyện này.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-between align-items-center p-3 border-top" style="border-color: var(--surface-border) !important;" th:if="${totalChapterPages > 1 and chapterSearch == null}">
+                                <div class="text-secondary small">
+                                    Hiển thị <span th:text="${chapters.size()}">0</span>/<span th:text="${totalChapters}">0</span> chương
+                                </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item" th:classappend="${chapterPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/comics/edit/{id}(id=${comic.comicId}, chapterPage=${chapterPage - 1})}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalChapterPages - 1)}" th:classappend="${i == chapterPage} ? 'active'">
+                                            <a class="page-link" th:href="@{/admin/comics/edit/{id}(id=${comic.comicId}, chapterPage=${i})}" th:text="${i + 1}">1</a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${chapterPage >= totalChapterPages - 1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/comics/edit/{id}(id=${comic.comicId}, chapterPage=${chapterPage + 1})}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Chapter Confirmation Modal -->
+    <div class="modal fade" id="deleteChapterModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-flex align-items-start" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Cảnh báo!</strong> Hành động này không thể hoàn tác.
+                        </div>
+                    </div>
+                    <p>Bạn có chắc chắn muốn xóa chapter này không?</p>
+                    <div class="p-3 mb-3 rounded" style="background-color: rgba(255, 255, 255, 0.05);">
+                        <div><strong class="text-primary" id="chapterNumberToDelete">Chapter 179</strong></div>
+                        <div class="mt-1"><small class="text-secondary" id="chapterTitleToDelete">The End</small></div>
+                    </div>
+                    <p class="text-secondary small mb-0">
+                        Tất cả dữ liệu và hình ảnh của chapter này sẽ bị xóa vĩnh viễn.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteChapter">
+                        <i class="bi bi-trash me-2"></i>
+                        Xóa chapter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== COVER IMAGE UPLOAD ====================
+        
+        // Get elements
+        const coverImage = document.getElementById('coverImage');
+        const coverFileInput = document.getElementById('coverFileInput');
+        const changeCoverBtn = document.getElementById('changeCoverBtn');
+        const coverPreview = document.getElementById('coverPreview');
+
+        // Click button to open file picker
+        changeCoverBtn.addEventListener('click', function() {
+            coverFileInput.click();
+        });
+
+        // Handle file upload
+        coverFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file ảnh!');
+                    return;
+                }
+
+                // Validate file size (max 1MB)
+                if (file.size > 1024 * 1024) {
+                    alert('Kích thước file không được vượt quá 1MB!');
+                    coverFileInput.value = '';
+                    return;
+                }
+
+                // Read and display image
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    coverImage.src = event.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+        // Click on cover preview to change image
+        coverPreview.addEventListener('click', function() {
+            coverFileInput.click();
+        });
+
+        // ==================== DELETE CHAPTER MODAL ====================
+        
+        // Handle delete chapter modal
+        const deleteChapterModal = document.getElementById('deleteChapterModal');
+        if (deleteChapterModal) {
+            deleteChapterModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const chapterNumber = button.getAttribute('data-chapter-number');
+            const chapterTitle = button.getAttribute('data-chapter-title');
+            
+            // Update modal content
+            document.getElementById('chapterNumberToDelete').textContent = 'Chapter ' + chapterNumber;
+            document.getElementById('chapterTitleToDelete').textContent = chapterTitle.replace('Chapter ' + chapterNumber + ': ', '');
+        });
+
+        // Handle confirm delete
+        document.getElementById('confirmDeleteChapter').addEventListener('click', function() {
+            const chapterNumber = document.getElementById('chapterNumberToDelete').textContent;
+            alert('Chapter đã được xóa thành công!');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(deleteChapterModal);
+            if (modal) {
+                modal.hide();
+            }
+        });
+        }
+        
+        // hightlight sidebar
+        const currentPage = window.location.pathname.split("/").pop();
+        let pageType = "comic";
+        if (currentPage.includes("comic") || currentPage.includes("chap")) {
+            pageType = "comic";
+        } else if (currentPage.includes("genre")) {
+            pageType = "genre";
+        } else if (currentPage.includes("user")) {
+            pageType = "user";
+        }
+        document.querySelectorAll(".nav-link-custom").forEach(link => {
+            const linkPage = link.getAttribute("href");
+
+            if (linkPage.includes(pageType)) {
+                link.classList.add("active");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'MangaRead - ' + ${comic.title} + ' - Ch. ' + ${chapter.chapterNum.stripTrailingZeros().toPlainString()}">MangaRead - Solo Leveling</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--background-dark); }
+        ::-webkit-scrollbar-thumb { background: #362249; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-dark); }
+
+        /* ── Header ── */
+        .reader-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-dark);
+            background-color: rgba(25, 16, 34, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 0 1rem;
+            height: 3.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .reader-header.hide {
+            transform: translateY(-100%);
+        }
+
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            color: white;
+            background-color: var(--surface-dark);
+        }
+
+        .manga-name {
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+            margin-bottom: 0;
+        }
+
+
+        .reader-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        /* Chapter Navigator */
+        .chapter-nav {
+            display: flex;
+            align-items: center;
+            background-color: var(--surface-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            height: 2.25rem;
+        }
+
+        .btn-chapter-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 100%;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .btn-chapter-nav:hover:not(.disabled) { color: white; background-color: var(--primary); }
+        .btn-chapter-nav.disabled { opacity: 0.3; cursor: default; }
+        .btn-chapter-nav:first-child { border-right: 1px solid var(--border-dark); }
+        .btn-chapter-nav:last-child  { border-left:  1px solid var(--border-dark); }
+
+        .chapter-select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0 0.5rem;
+            min-width: 100px;
+            height: 100%;
+            cursor: pointer;
+            appearance: none;
+            text-align: center;
+        }
+
+        /* Follow Button */
+        .btn-reader-follow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--surface-dark);
+            border: 1px solid var(--border-dark);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            height: 2.25rem;
+            padding: 0 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-reader-follow:hover {
+            border-color: var(--primary);
+            background-color: rgba(140, 37, 244, 0.1);
+        }
+        .btn-reader-follow.followed {
+            background-color: rgba(140, 37, 244, 0.2);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+
+        .chapter-select:focus { outline: none; }
+        .chapter-select option { background-color: var(--surface-dark); color: white; }
+
+        /* ── Manga Pages ── */
+        .manga-pages {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3.5rem 0 3rem;
+            background-color: #0d0d0d;
+        }
+
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .manga-page {
+            width: 100%;
+            margin-bottom: 0;
+            line-height: 0;
+        }
+
+        .manga-page img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ── Bottom Navigation ── */
+        .reader-footer {
+            padding: 3rem 1rem 5rem;
+            display: flex;
+            justify-content: center;
+            background-color: #0d0d0d;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-nav-bottom {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-nav-prev, .btn-nav-next {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        .btn-nav-prev:hover, .btn-nav-next:hover {
+            background-color: #7a1fd6;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-nav-prev.disabled, .btn-nav-next.disabled {
+            background-color: var(--surface-dark);
+            color: var(--text-secondary);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .btn-nav-detail {
+            background-color: transparent;
+            color: white;
+            border: 1px solid var(--border-dark);
+        }
+        .btn-nav-detail:hover {
+            background-color: var(--surface-dark);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 576px) {
+            .manga-name { max-width: 130px; }
+            .btn-nav-bottom { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ── -->
+    <header class="reader-header" id="readerHeader">
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="btn-back" title="Quay lại">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="d-none d-lg-block">
+                <h1 class="manga-name" th:text="${comic.title}">Solo Leveling</h1>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a th:if="${prevChapter != null}" 
+               th:href="@{/comic-reading/{id}(id=${prevChapter.chapterId})}" 
+               class="btn-chapter-nav" title="Chương trước">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <span th:if="${prevChapter == null}" class="btn-chapter-nav disabled">
+                <i class="bi bi-chevron-left"></i>
+            </span>
+
+            <select class="chapter-select" onchange="window.location.href='/comic-reading/' + this.value">
+                <option th:each="c : ${chapters}" 
+                        th:value="${c.chapterId}" 
+                        th:selected="${c.chapterId == chapter.chapterId}"
+                        th:text="'Chương ' + ${c.chapterNum.stripTrailingZeros().toPlainString()}"></option>
+            </select>
+
+            <a th:if="${nextChapter != null}" 
+               th:href="@{/comic-reading/{id}(id=${nextChapter.chapterId})}" 
+               class="btn-chapter-nav" title="Chương sau">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            <span th:if="${nextChapter == null}" class="btn-chapter-nav disabled">
+                <i class="bi bi-chevron-right"></i>
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+             <button class="btn-reader-follow" th:classappend="${isFollowing} ? 'followed'" onclick="toggleBookmark(this)">
+                 <i th:class="${isFollowing} ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
+                 <span class="d-none d-sm-inline" th:text="${isFollowing} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
+             </button>
+        </div>
+    </header>
+
+
+    <!-- ── Manga Pages ── -->
+    <main class="manga-pages">
+        <div class="page-wrapper">
+            <div class="manga-page" th:each="i : ${#numbers.sequence(1, chapter.imageCount)}">
+                <img th:src="${minioUrl + '/comics/comic-' + comic.comicId + '/chapters/' + chapter.resourcePath + '/' + i + '.jpg'}" 
+                     th:alt="'Trang ' + ${i}" 
+                     loading="lazy">
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Bottom Navigation ── -->
+    <div class="reader-footer">
+        <div class="nav-buttons">
+            <a th:href="@{/comic-reading/{id}(id=${prevChapter.chapterId})}" 
+               th:if="${prevChapter != null}"
+               class="btn-nav-bottom btn-nav-prev">
+                <i class="bi bi-arrow-left"></i> Chương trước
+            </a>
+            <span th:if="${prevChapter == null}" class="btn-nav-bottom btn-nav-prev disabled">
+                <i class="bi bi-arrow-left"></i> Chương trước
+            </span>
+
+            <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="btn-nav-bottom btn-nav-detail">
+                <i class="bi bi-info-circle"></i> Về trang chi tiết truyện
+            </a>
+
+            <a th:href="@{/comic-reading/{id}(id=${nextChapter.chapterId})}" 
+               th:if="${nextChapter != null}"
+               class="btn-nav-bottom btn-nav-next">
+                Chương tiếp theo <i class="bi bi-arrow-right"></i>
+            </a>
+            <span th:if="${nextChapter == null}" class="btn-nav-bottom btn-nav-next disabled">
+                Chương tiếp theo <i class="bi bi-arrow-right"></i>
+            </span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const comicId = /*[[${comic.comicId}]]*/ 0;
+        /*]]>*/
+    </script>
+    <script>
+        // Hide on scroll logic
+        let lastScroll = 0;
+        const header = document.getElementById('readerHeader');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll <= 100) {
+                header.classList.remove('hide');
+                return;
+            }
+            if (currentScroll > lastScroll && !header.classList.contains('hide')) {
+                // Scroll down
+                header.classList.add('hide');
+            } else if (currentScroll < lastScroll && header.classList.contains('hide')) {
+                // Scroll up
+                header.classList.remove('hide');
+            }
+            lastScroll = currentScroll;
+        });
+
+        function toggleBookmark(btn) {
+            fetch('/api/follow/comic/' + comicId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const isFollowing = data.following;
+                    const icon = btn.querySelector('.bi');
+                    const label = btn.querySelector('span');
+
+                    if (isFollowing) {
+                        btn.classList.add('followed');
+                        icon.className = 'bi bi-bookmark-fill';
+                        if (label) label.textContent = 'Đang theo dõi';
+                    } else {
+                        btn.classList.remove('followed');
+                        icon.className = 'bi bi-bookmark';
+                        if (label) label.textContent = 'Theo dõi';
+                    }
+                } else if (data.message.includes('đăng nhập')) {
+                    window.location.href = '/login?required';
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

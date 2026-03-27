@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${comic.title} + ' - Mangaread'">Mangaread - Comic Detail</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <style>
+        .comic-cover {
+            position: relative;
+            aspect-ratio: 2/3;
+            width: 100%;
+            max-width: 280px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 0 40px -10px rgba(140, 37, 244, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comic-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .comic-cover:hover img { transform: scale(1.05); }
+
+        .comic-description-box {
+            background-color: var(--surface-dark);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1rem;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-read {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            box-shadow: 0 10px 15px -3px rgba(140,37,244,0.2);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-read:hover {
+            background-color: #7a1fd6;
+            box-shadow: 0 10px 15px -3px rgba(140,37,244,0.4);
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-bookmark {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--surface-dark);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.25s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-bookmark:hover {
+            background-color: rgba(140,37,244,0.12);
+            border-color: rgba(140,37,244,0.35);
+            color: var(--primary);
+        }
+
+        .btn-bookmark.bookmarked {
+            background-color: rgba(140,37,244,0.18);
+            border-color: rgba(140,37,244,0.55);
+            color: var(--primary);
+        }
+
+        .btn-bookmark .bi {
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-bookmark.pop {
+            animation: bookmarkPop 0.3s ease forwards;
+        }
+
+        @keyframes bookmarkPop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .comic-author {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .comic-author:hover { color: white; }
+
+        .comic-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin: 1rem 0 1.5rem;
+        }
+
+        @media (min-width: 640px)  { .comic-title { font-size: 3rem; } }
+        @media (min-width: 1024px) { .comic-title { font-size: 3.75rem; } }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(54,34,73,0.8);
+            padding: 0.375rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            font-size: 0.875rem;
+        }
+
+        .stat-badge .bi {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .stat-value { font-weight: 700; color: white; }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid;
+        }
+
+        .status-ongoing {
+            background-color: rgba(34,197,94,0.1);
+            color: #4ade80;
+            border-color: rgba(34,197,94,0.3);
+        }
+
+        .status-completed {
+            background-color: rgba(59,130,246,0.1);
+            color: #60a5fa;
+            border-color: rgba(59,130,246,0.3);
+        }
+
+        .genre-tag {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            background-color: rgba(140,37,244,0.1);
+            color: var(--primary);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(140,37,244,0.2);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .genre-tag:hover {
+            background-color: rgba(140,37,244,0.2);
+            border-color: rgba(140,37,244,0.4);
+        }
+
+        .comic-description {
+            color: rgba(173,144,203,0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-header .bi {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .chapter-list-scroll {
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-dark) transparent;
+        }
+
+        .chapter-list-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chapter-list-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chapter-list-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--border-dark);
+            border-radius: 9999px;
+        }
+
+        .chapter-card {
+            background-color: var(--surface-dark);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .chapter-card:hover {
+            transform: translateX(4px);
+            border-color: rgba(140,37,244,0.3);
+            background-color: rgba(140,37,244,0.07);
+        }
+
+        .chapter-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: var(--background-dark);
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+
+        .chapter-card:hover .chapter-number { color: white; }
+
+        .chapter-info {
+            flex: 1;
+            margin-left: 1rem;
+            min-width: 0;
+        }
+
+        .chapter-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.2rem;
+            transition: color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chapter-card:hover .chapter-title { color: var(--primary); }
+
+        .chapter-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .chapter-arrow {
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+
+        .chapter-card:hover .chapter-arrow {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .pagination { gap: 0.35rem; }
+
+        .page-link {
+            color: var(--text-secondary);
+            background-color: var(--surface-dark);
+            border: 1px solid transparent;
+            min-width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem !important;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            padding: 0 0.5rem;
+            text-decoration: none;
+        }
+
+        .page-link:hover {
+            background-color: rgba(140,37,244,0.2);
+            border-color: rgba(140,37,244,0.4);
+            color: white;
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(140,37,244,0.35);
+        }
+
+        .page-item.disabled .page-link { opacity: 0.4; }
+
+        .comment-section {
+            background-color: var(--surface-dark);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .comment-textarea {
+            background-color: var(--background-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 0.5rem;
+            color: white;
+            padding: 0.75rem;
+            min-height: 80px;
+            resize: vertical;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .comment-textarea::placeholder { color: var(--text-secondary); }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(140,37,244,0.25);
+        }
+
+        .btn-post {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-post:hover { background-color: #7a1fd6; }
+
+        .comment-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 0;
+        }
+
+        .comment-item:not(:last-child) {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .comment-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .comment-author { font-size: 0.875rem; font-weight: 700; color: white; }
+        .comment-time   { font-size: 0.75rem; color: var(--text-secondary); }
+        .comment-text   { font-size: 0.875rem; color: rgba(255,255,255,0.8); margin: 0.25rem 0; }
+
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: #ef4444;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover { color: #dc2626; }
+
+        .footer {
+            border-top: 1px solid var(--surface-dark);
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .footer a:hover { color: white; }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-blur-container">
+        <div class="blur-circle-1"></div>
+        <div class="blur-circle-2"></div>
+    </div>
+
+    <div th:replace="~{fragments/navbar-client :: navbarClient}"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <main>
+        <div class="container position-relative mt-5" style="max-width: 1280px; z-index: 10;">
+            <div class="row g-4 g-lg-5">
+                <!-- Ảnh bìa -->
+                <div class="col-md-4 col-lg-3">
+                    <div class="comic-cover">
+                        <img th:src="${comic.coverImage != null && !#strings.isEmpty(comic.coverImage) ? (comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage) : 'https://placehold.co/280x420/1a1a2e/8c25f4?text=' + comic.title}" th:alt="${comic.title}">
+                        <span class="status-badge" th:text="${comic.status}">Ongoing</span>
+                    </div>
+                    <!-- Buttons mobile -->
+                    <div class="d-flex d-md-none gap-2 mt-3">
+                        <a th:href="@{/comic-reading/{id}(id=${chapters[chapters.size() - 1].chapterId})}" class="btn-read flex-grow-1 text-decoration-none" th:if="${not #lists.isEmpty(chapters)}">
+                            <i class="bi bi-play-fill"></i> Đọc ngay
+                        </a>
+
+                        <button class="btn-bookmark" id="bookmarkBtnMobile" onclick="toggleBookmark(this)">
+                            <i class="bi bi-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thông tin truyện (không có mô tả) -->
+                <div class="col-md-8 col-lg-9">
+                    <div class="comic-author mb-3">
+                        <i class="bi bi-person"></i>
+                        <span th:text="${comic.author}">Unknown</span>
+                    </div>
+
+                    <h1 class="comic-title" th:text="${comic.title}">Comic Title</h1>
+
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <div class="stat-badge">
+                            <i class="bi bi-eye"></i>
+                            <span class="stat-value" th:text="${#numbers.formatInteger(comic.totalViews, 3, 'COMMA')}">0</span>
+                        </div>
+                        <div class="stat-badge">
+                            <i class="bi bi-heart"></i>
+                            <span class="stat-value" th:text="${#numbers.formatInteger(comic.totalFollows, 3, 'COMMA')}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="status-chip status-ongoing" th:if="${comic.status == 'Ongoing'}">
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                            Đang tiến hành
+                        </span>
+                        <span class="status-chip status-completed" th:if="${comic.status == 'Completed'}">
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                            Hoàn thành
+                        </span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <th:block th:each="genre : ${comic.genres}">
+                            <a th:href="@{/comics-by-genre/{id}(id=${genre.genreId})}"><span class="genre-tag" th:text="${genre.name}">Genre</span></a>
+                        </th:block>
+                    </div>
+
+                    <div class="d-none d-md-flex gap-3 mt-4">
+                        <a th:href="@{/comic-reading/{id}(id=${chapters[chapters.size() - 1].chapterId})}" class="btn-read text-decoration-none" th:if="${not #lists.isEmpty(chapters)}">
+                            <i class="bi bi-play-fill"></i>
+                            Đọc từ đầu
+                        </a>
+
+                        <button class="btn-bookmark" 
+                                id="bookmarkBtnDesktop" 
+                                onclick="toggleBookmark(this)"
+                                th:classappend="${isFollowing} ? 'bookmarked'">
+                            <i th:classappend="${isFollowing} ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'" class="bi"></i>
+                            <span class="bookmark-label" th:text="${isFollowing} ? 'Đang theo dõi' : 'Theo dõi'">Theo dõi</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mô tả truyện - nằm dưới -->
+                <div class="col-12">
+                    <div class="comic-description-box">
+                        <h5 class="section-header mb-3">
+                            <i class="bi bi-text-left"></i>
+                            Mô tả
+                        </h5>
+                        <p class="comic-description" th:text="${comic.description}">Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container py-5" style="max-width: 1280px;">
+
+            <div class="mb-5">
+                <div class="section-header">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Danh sách chương</span>
+                    <span class="text-secondary" style="font-size: 0.875rem; font-weight: 400;" th:text="'(' + ${#lists.size(chapters)} + ' chương)'">(0 chương)</span>
+                </div>
+
+                <div class="chapter-list-scroll">
+                    <th:block th:each="chapter : ${chapters}">
+                        <a th:href="@{/comic-reading/{id}(id=${chapter.chapterId})}" class="chapter-card">
+
+                            <div class="chapter-number" th:text="${chapter.chapterNum.stripTrailingZeros().toPlainString()}">1</div>
+                            <div class="chapter-info">
+                                <div class="chapter-title" th:text="${chapter.title != null ? chapter.title : 'Chương ' + chapter.chapterNum.stripTrailingZeros().toPlainString()}">Chapter Title</div>
+                                <div class="chapter-date" th:text="${#temporals.format(chapter.createdAt, 'dd/MM/yyyy')}">01/01/2024</div>
+                            </div>
+                            <i class="bi bi-chevron-right chapter-arrow"></i>
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="comment-section">
+                <div class="section-header">
+                    <i class="bi bi-chat-dots"></i>
+                    <span>Bình luận</span>
+                    <span class="text-secondary" style="font-size: 0.875rem; font-weight: 400;" th:text="'(' + ${totalComments} + ')'">(0)</span>
+                </div>
+
+                <div sec:authorize="isAuthenticated()">
+                    <div class="d-flex gap-3 mb-4">
+                            <img th:src="${#authentication.principal.user.avatarUrl != null ? #authentication.principal.user.avatarUrl : 'https://placehold.co/100x100/8c25f4/FFF?text=U'}" class="comment-avatar" alt="Avatar">
+                        <div class="flex-grow-1">
+                            <textarea class="form-control comment-textarea w-100" id="commentContent" placeholder="Tham gia thảo luận..."></textarea>
+                            <div class="mt-2 d-flex justify-content-end">
+                                <button class="btn-post" onclick="postComment()">
+                                    <i class="bi bi-send me-1"></i>Đăng bình luận
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div sec:authorize="!isAuthenticated()" class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <a th:href="@{/login}" class="alert-link">Đăng nhập</a> để bình luận và theo dõi truyện.
+                </div>
+
+                <div class="mb-4" id="commentList">
+                    <th:block th:each="comment : ${comments}">
+                        <div class="comment-item">
+                            <img th:src="${comment.user.avatarUrl != null ? comment.user.avatarUrl : 'https://placehold.co/100x100/8c25f4/FFF?text=U'}" class="comment-avatar" alt="Avatar">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="comment-author" th:text="${comment.user.fullName}">User Name</span>
+                                    <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Time</span>
+                                </div>
+                                <p class="comment-text" th:text="${comment.content}">Comment content</p>
+                                <div class="d-flex justify-content-end" th:if="${#authentication.principal != null and (#authentication.principal.user.userId == comment.user.userId or #authorization.expression('hasRole(''ADMIN'')'))}">
+                                    <button class="btn-delete" th:onclick="'deleteComment(' + ${comment.commentId} + ')'">
+                                        <i class="bi bi-trash3" style="font-size:0.8rem;"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+
+                    <div th:if="${#lists.isEmpty(comments)}" class="text-center py-4 text-secondary">
+                        <i class="bi bi-chat-square-text fs-1"></i>
+                        <p class="mt-2">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center" th:if="${totalCommentPages > 1}">
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${commentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/comic-detail/{id}(id=${comic.comicId}, commentPage=${commentPage - 1})}"><i class="bi bi-chevron-left"></i></a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalCommentPages - 1)}" th:classappend="${i == commentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/comic-detail/{id}(id=${comic.comicId}, commentPage=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${commentPage >= totalCommentPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/comic-detail/{id}(id=${comic.comicId}, commentPage=${commentPage + 1})}"><i class="bi bi-chevron-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3" style="max-width: 1280px;">
+            <div class="d-flex align-items-center gap-2 text-white">
+                <i class="bi bi-book" style="color: var(--primary);"></i>
+                <span class="fw-bold">MangaRead</span>
+            </div>
+            <p class="text-secondary mb-0" style="font-size: 0.875rem;">© 2024 MangaRead. All rights reserved.</p>
+            <div class="d-flex gap-3">
+                <a href="#"><i class="bi bi-question-circle fs-5"></i></a>
+                <a href="#"><i class="bi bi-shield-check fs-5"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/navbar-client.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var comicId = /*[[${comic.comicId}]]*/ 0;
+        var isFollowing = /*[[${isFollowing}]]*/ false;
+        /*]]>*/
+    </script>
+    <script>
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 show`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function toggleBookmark(clickedBtn) {
+            fetch('/api/follow/comic/' + comicId, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    isFollowing = data.following;
+                    const btns = document.querySelectorAll('.btn-bookmark');
+                    btns.forEach(btn => {
+                        const icon = btn.querySelector('.bi');
+                        const label = btn.querySelector('.bookmark-label');
+
+                        if (isFollowing) {
+                            btn.classList.add('bookmarked');
+                            icon.className = 'bi bi-bookmark-fill';
+                            if (label) label.textContent = 'Đang theo dõi';
+                        } else {
+                            btn.classList.remove('bookmarked');
+                            icon.className = 'bi bi-bookmark';
+                            if (label) label.textContent = 'Theo dõi';
+                        }
+                    });
+
+                    clickedBtn.classList.remove('pop');
+                    void clickedBtn.offsetWidth;
+                    clickedBtn.classList.add('pop');
+
+                    showToast(data.message, 'success');
+                } else {
+                    if (data.message.includes('đăng nhập')) {
+                        showToast('Vui lòng đăng nhập để sử dụng tính năng này', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login?required';
+                        }, 1200);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra', 'error');
+            });
+        }
+
+        function postComment() {
+            const content = document.getElementById('commentContent').value.trim();
+            if (!content) {
+                showToast('Vui lòng nhập nội dung bình luận', 'error');
+                return;
+            }
+
+            fetch('/api/comments/comic/' + comicId, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Bình luận thành công!', 'success');
+                    document.getElementById('commentContent').value = '';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    if (data.message.includes('đăng nhập')) {
+                        showToast('Vui lòng đăng nhập để sử dụng tính năng này', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login?required';
+                        }, 1200);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra', 'error');
+            });
+        }
+
+        function deleteComment(commentId) {
+            if (!confirm('Bạn có chắc muốn xóa bình luận này?')) {
+                return;
+            }
+
+            fetch('/api/comments/' + commentId, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Đã xóa bình luận', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Có lỗi xảy ra', 'error');
+            });
+        }
+    </script>
+</body>
+</html>

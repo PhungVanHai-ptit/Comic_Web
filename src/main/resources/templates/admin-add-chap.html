@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MangaRead Admin - Thêm chapter mới</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="/css/admin.css" rel="stylesheet">
+    <style>
+        .manga-name { color: var(--primary); font-weight: 600; }
+        .btn-back { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: 1px solid var(--surface-border); background: none; color: var(--secondary-text); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-back:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
+        .form-card { background-color: var(--surface-dark); border: 1px solid var(--surface-border); border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); }
+        .form-card-header { padding: 1.5rem; border-bottom: 1px solid var(--surface-border); background-color: rgba(25, 16, 34, 0.3); }
+        .form-card-title { font-size: 1.125rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .form-card-body { padding: 2rem; }
+        .form-label-custom { font-size: 0.75rem; font-weight: 700; color: var(--secondary-text); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .upload-area { border: 2px dashed var(--surface-border); border-radius: 0.75rem; padding: 3rem; text-align: center; cursor: pointer; transition: all 0.3s; background-color: var(--background-dark); }
+        .upload-area:hover { border-color: rgba(140, 37, 244, 0.5); background-color: rgba(140, 37, 244, 0.05); }
+        .upload-area.dragover { border-color: var(--primary); background-color: rgba(140, 37, 244, 0.1); }
+        .upload-icon { width: 4rem; height: 4rem; background-color: var(--surface-dark); border: 1px solid var(--surface-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; transition: transform 0.3s; }
+        .upload-area:hover .upload-icon { transform: scale(1.1); }
+        .upload-icon i { font-size: 2rem; color: var(--primary); }
+        .upload-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .upload-subtitle { color: var(--secondary-text); font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .file-types { display: flex; gap: 1rem; justify-content: center; }
+        .file-type-badge { display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background-color: rgba(38, 24, 52, 0.5); border: 1px solid var(--surface-border); border-radius: 0.5rem; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--secondary-text); }
+        .info-alert { margin-top: 1.5rem; padding: 1rem; background-color: rgba(140, 37, 244, 0.05); border: 1px solid rgba(140, 37, 244, 0.2); border-radius: 0.5rem; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .info-alert i { color: var(--primary); flex-shrink: 0; margin-top: 0.125rem; }
+        .info-alert-text { font-size: 0.875rem; color: var(--secondary-text); }
+        .info-alert-text strong { color: var(--primary); }
+        .page-count-badge { padding: 0.25rem 0.75rem; background-color: var(--background-dark); border: 1px solid var(--surface-border); border-radius: 9999px; font-size: 0.75rem; font-weight: 500; color: var(--secondary-text); }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <a th:href="@{/admin/comics}" class="btn-back">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h2 class="page-title">Thêm chapter mới</h2>
+                            <p class="page-subtitle">
+                                Đang upload cho: <span class="manga-name" th:text="${comic.title}">One Piece</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <a th:href="@{/admin/comics/edit/{id}(id=${comic.comicId})}" class="btn btn-outline-secondary">
+                            Hủy
+                        </a>
+                        <button type="button" class="btn btn-primary" onclick="submitChapterForm()">
+                            <i class="bi bi-cloud-upload me-2"></i>
+                            Upload Chapter
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="mx-auto" style="max-width: 1000px;">
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <form id="chapterForm" th:action="@{/admin/comics/{comicId}/chapters/add(comicId=${comic.comicId})}" method="post" enctype="multipart/form-data" th:object="${chapter}">
+                    <!-- Chapter Details Card -->
+                    <div class="form-card mb-4">
+                        <div class="form-card-header">
+                            <h3 class="form-card-title">
+                                <i class="bi bi-pencil-square text-primary"></i>
+                                Thông tin chapter
+                            </h3>
+                        </div>
+                        <div class="form-card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Số chapter <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" th:field="*{chapterNum}" placeholder="VD: 1">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label-custom">Tiêu đề chapter (Tùy chọn)</label>
+                                    <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tiêu đề chapter...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Pages Card -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h3 class="form-card-title mb-0">
+                                    <i class="bi bi-images text-primary"></i>
+                                    Trang chapter
+                                </h3>
+                                <span class="page-count-badge" id="pageCount">0 Trang đã chọn</span>
+                            </div>
+                        </div>
+                        <div class="form-card-body">
+                            <!-- Upload Area -->
+                            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-upload"></i>
+                                </div>
+                                <h4 class="upload-title">Click để upload hoặc kéo thả</h4>
+                                <p class="upload-subtitle">
+                                    Upload ảnh chất lượng cao. Khuyến nghị: JPG, PNG hoặc WEBP.
+                                </p>
+                                <div class="file-types">
+                                    <div class="file-type-badge">
+                                        <i class="bi bi-file-image"></i>
+                                        JPG
+                                    </div>
+                                    <div class="file-type-badge">
+                                        <i class="bi bi-file-image"></i>
+                                        PNG
+                                    </div>
+                                    <div class="file-type-badge">
+                                        <i class="bi bi-file-image"></i>
+                                        WEBP
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Info Alert -->
+                            <div class="info-alert">
+                                <i class="bi bi-info-circle"></i>
+                                <p class="info-alert-text mb-0">
+                                    <strong>Lưu ý:</strong> Vui lòng đặt tên các trang theo số thứ tự (01.jpg, 02.jpg, v.v.) để duy trì thứ tự đọc đúng khi upload.
+                                </p>
+                            </div>
+
+                            <!-- Preview Area (hidden initially) -->
+                            <div id="previewArea" class="mt-4" style="display: none;">
+                                <h5 class="mb-3" style="color: var(--secondary-text); font-size: 0.875rem; font-weight: 700; text-transform: uppercase;">
+                                    <i class="bi bi-eye me-2"></i>
+                                    Xem trước
+                                </h5>
+                                <div class="row g-3" id="previewGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const pageCount = document.getElementById('pageCount');
+        const previewArea = document.getElementById('previewArea');
+        const previewGrid = document.getElementById('previewGrid');
+
+        let selectedFiles = [];
+        let draggedIndex = null;
+        let placeholderIndex = null;
+
+        /* =============================
+           Upload Logic
+           ============================= */
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+        uploadArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', e => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFiles(files) {
+            const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+
+            if (!newFiles.length) {
+                alert('Vui lòng chọn file ảnh!');
+                return;
+            }
+
+            let hasBigFile = false;
+            newFiles.forEach(f => {
+                if (f.size > 500 * 1024) hasBigFile = true;
+            });
+            
+            if (hasBigFile) {
+                alert('Một số ảnh có kích thước vượt quá 500KB! Vui lòng nén ảnh lại trước khi tải lên.');
+                return;
+            }
+
+            selectedFiles = [...selectedFiles, ...newFiles];
+
+            let totalSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0);
+            if (totalSize > 35 * 1024 * 1024) {
+                alert('Tổng dung lượng các ảnh mới vượt quá 35MB! Vui lòng xóa bớt ảnh hoặc nén lại.');
+                return;
+            }
+
+            selectedFiles.sort((a, b) =>
+                a.name.localeCompare(b.name, undefined, { numeric: true })
+            );
+
+            pageCount.textContent = selectedFiles.length + ' Trang đã chọn';
+            fileInput.value = '';
+            displayPreview();
+        }
+
+        function updatePageNumbers() {
+            const items = previewGrid.querySelectorAll('.page-number');
+            items.forEach((el, i) => {
+                el.textContent = i + 1;
+            });
+        }
+
+        /* =============================
+           Preview + Drag Insert Logic
+           ============================= */
+
+        function displayPreview() {
+            previewArea.style.display = 'block';
+            previewGrid.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
+                col.draggable = true;
+                col.dataset.index = index;
+                col.style.position = "relative";
+                col.style.cursor = "move";
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    col.innerHTML = `
+                        <div style="position: relative; aspect-ratio: 2/3; border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--surface-border); transition: all 0.2s;">
+                            <img src="${e.target.result}" 
+                                style="width:100%;height:100%;object-fit:cover;">
+                            
+                            <div class="page-number" 
+                                style="position:absolute;top:0.5rem;left:0.5rem;
+                                background:var(--primary);color:#fff;
+                                padding:0.25rem 0.5rem;border-radius:0.25rem;
+                                font-size:0.75rem;font-weight:700;">
+                                ${index + 1}
+                            </div>
+
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 0.5rem 0.5rem 0.25rem; font-size: 0.625rem; color: white; word-break: break-all; line-height: 1.2;">
+                                ${file.name}
+                            </div>
+
+                            <button type="button" onclick="removeFile(${index})"
+                                style="
+                                    position:absolute;
+                                    top:0.5rem;
+                                    right:0.5rem;
+                                    background:rgba(239,68,68,0.9);
+                                    color:#fff;
+                                    border:none;
+                                    width:1.5rem;
+                                    height:1.5rem;
+                                    border-radius:0.25rem;
+                                    cursor:pointer;
+                                    transition:all 0.2s;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;"
+                                    onmouseover="this.style.backgroundColor='#dc2626'"
+                                    onmouseout="this.style.backgroundColor='rgba(239,68,68,0.9)'">
+                                    <i class="bi bi-x" style="font-size:1rem;"></i>
+                            </button>
+                        </div>
+                    `;
+                };
+
+                reader.readAsDataURL(file);
+
+                /* ===== Drag Logic ===== */
+
+                col.addEventListener('dragstart', () => {
+                    draggedIndex = index;
+                    col.style.opacity = '0.4';
+                });
+
+                col.addEventListener('dragend', () => {
+                    col.style.opacity = '1';
+                    draggedIndex = null;
+                    removeInsertionLine();
+                    updatePageNumbers();
+                });
+
+                col.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    if (draggedIndex !== null) {
+                        showInsertionLine(e, col);
+                    }
+                });
+
+                col.addEventListener('drop', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (placeholderIndex === null || draggedIndex === null) return;
+
+                    const draggedItem = selectedFiles[draggedIndex];
+                    selectedFiles.splice(draggedIndex, 1);
+
+                    if (draggedIndex < placeholderIndex) {
+                        placeholderIndex--;
+                    }
+
+                    selectedFiles.splice(placeholderIndex, 0, draggedItem);
+
+                    draggedIndex = null;
+                    placeholderIndex = null;
+
+                    displayPreview();
+                });
+
+                previewGrid.appendChild(col);
+            });
+
+            updatePageNumbers();
+        }
+
+        /* =============================
+           Insertion Line
+           ============================= */
+
+        function showInsertionLine(e, col) {
+            const rect = col.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+
+            const index = parseInt(col.dataset.index);
+
+            removeInsertionLine();
+
+            const line = document.createElement('div');
+            line.id = "insertion-line";
+            line.style.position = "absolute";
+            line.style.top = "0";
+            line.style.bottom = "0";
+            line.style.width = "3px";
+            line.style.background = "var(--primary)";
+            line.style.borderRadius = "2px";
+            line.style.pointerEvents = "none";
+            line.style.zIndex = "10";
+
+            if (offsetX < rect.width / 2) {
+                // Insert BEFORE
+                placeholderIndex = index;
+                line.style.left = "-2px";
+            } else {
+                // Insert AFTER
+                placeholderIndex = index + 1;
+                line.style.right = "-2px";
+            }
+
+            col.appendChild(line);
+        }
+
+        function removeInsertionLine() {
+            const existing = document.getElementById('insertion-line');
+            if (existing) existing.remove();
+        }
+
+        /* =============================
+           Remove File
+           ============================= */
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+
+            if (!selectedFiles.length) {
+                previewArea.style.display = 'none';
+                pageCount.textContent = '0 Trang đã chọn';
+                fileInput.value = '';
+            } else {
+                pageCount.textContent = selectedFiles.length + ' Trang đã chọn';
+                displayPreview();
+            }
+        }
+        
+        function submitChapterForm() {
+            if (selectedFiles.length === 0) {
+                alert('Vui lòng chọn ít nhất 1 ảnh cho chapter!');
+                return;
+            }
+            if (!document.getElementById('chapterNum').value) {
+                alert('Vui lòng nhập số chapter!');
+                document.getElementById('chapterNum').focus();
+                return;
+            }
+            
+            let totalSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0);
+            if (totalSize > 35 * 1024 * 1024) {
+                alert('Tổng dung lượng các ảnh mới đang vượt quá 35MB! Server không thể tiếp nhận. Vui lòng nén lại.');
+                return;
+            }
+
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            
+            let realInput = document.getElementById('realFileInput');
+            if(!realInput) {
+                realInput = document.createElement('input');
+                realInput.type = 'file';
+                realInput.name = 'images';
+                realInput.multiple = true;
+                realInput.id = 'realFileInput';
+                realInput.style.display = 'none';
+                document.getElementById('chapterForm').appendChild(realInput);
+            }
+            realInput.files = dataTransfer.files;
+            
+            document.getElementById('chapterForm').submit();
+        }
+        
+        
+        // hightlight sidebar
+        const currentPage = window.location.pathname.split("/").pop();
+        let pageType = "comic";
+        if (currentPage.includes("comic") || currentPage.includes("chap")) {
+            pageType = "comic";
+        } else if (currentPage.includes("genre")) {
+            pageType = "genre";
+        } else if (currentPage.includes("user")) {
+            pageType = "user";
+        }
+        document.querySelectorAll(".nav-link-custom").forEach(link => {
+            const linkPage = link.getAttribute("href");
+
+            if (linkPage.includes(pageType)) {
+                link.classList.add("active");
+            }
+        });
+    </script>
+</body>
+</html>

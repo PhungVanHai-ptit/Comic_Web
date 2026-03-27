@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Navbar fragment</title>
+</head>
+<body>
+<!-- Fragment: navbar client (nav + mobile search modal) -->
+<div th:fragment="navbarClient">
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-book" style="color: var(--primary); font-size: 1.5rem; text-shadow: 1px 0 currentColor, -1px 0 currentColor, 0 1px currentColor, 0 -1px currentColor;"></i>
+                MangaRead
+            </a>
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                <button class="btn-mobile-search" type="button" data-bs-toggle="modal" data-bs-target="#mobileSearchModal">
+                    <i class="bi bi-search"></i>
+                </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Thể loại</a>
+                        <div class="dropdown-menu dropdown-genre-grid p-0">
+                            <div class="genre-grid p-3">
+                                <!-- Dynamic genres from server -->
+                                <th:block th:if="${allGenres != null and !allGenres.isEmpty()}">
+                                    <a th:each="genre : ${allGenres}"
+                                       th:href="@{/comics-by-genre/{id}(id=${genre.genreId})}"
+                                       th:text="${genre.name}"
+                                       class="genre-grid-item">
+                                    </a>
+                                </th:block>
+                                <!-- Fallback nếu không có data -->
+                                <th:block th:if="${allGenres == null or allGenres.isEmpty()}">
+                                    <a href="/all-comic" class="genre-grid-item">Tất cả thể loại</a>
+                                </th:block>
+                            </div>
+                            <div class="border-top" style="border-color: rgba(255,255,255,0.07) !important; padding: 0.75rem 1rem;">
+                                <a th:href="@{/all-comic}" class="text-center d-block" style="color: var(--primary); font-size: 0.8rem; font-weight: 600; text-decoration: none;">
+                                    <i class="bi bi-grid-3x3-gap me-1"></i>Xem tất cả thể loại
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/following-comics}">Theo dõi</a>
+                    </li>
+                </ul>
+
+                <!-- Desktop Search -->
+                <div class="search-container d-none d-lg-block flex-grow-1 mx-4">
+                    <i class="search-icon bi bi-search"></i>
+                    <input type="text" class="search-input form-control" id="searchInput"
+                           placeholder="Tìm theo tên truyện, tên tác giả..."
+                           autocomplete="off">
+                    <div class="search-dropdown" id="searchDropdown">
+                        <div id="searchResults">
+                            <!-- results injected by JS -->
+                        </div>
+                        <div class="search-footer" id="searchFooter" style="display:none;">
+                            <a id="searchAllLink" href="#">Xem tất cả kết quả</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đã đăng nhập: admin button + avatar + đăng xuất -->
+                <div class="d-flex align-items-center gap-3" id="userSection" sec:authorize="isAuthenticated()">
+                    <!-- Admin Button - ONLY for ADMIN role -->
+                    <a th:href="@{/admin/comics}" 
+                       class="btn-admin" 
+                       title="Quản trị viên"
+                       sec:authorize="hasRole('ADMIN')">
+                        <i class="bi bi-gear"></i>
+                    </a>
+                    
+                    <a th:href="@{/users/profile}" class="avatar-button" title="Trang cá nhân">
+                        <img id="navbarAvatarImg" 
+                             th:src="${#authentication.principal.user.avatarUrl != null && !#authentication.principal.user.avatarUrl.isEmpty() ? #authentication.principal.user.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'}" 
+                             alt="User Avatar">
+                    </a>
+
+
+
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn-logout">Đăng xuất</button>
+                    </form>
+                </div>
+
+                <!-- Chưa đăng nhập: Đăng nhập + Đăng ký -->
+                <div class="d-flex align-items-center gap-2" id="authButtons" sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}"><button type="button" class="btn-login">Đăng nhập</button></a>
+                    <a th:href="@{/register}"><button type="button" class="btn-signup">Đăng ký</button></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Search Modal -->
+    <div class="modal fade mobile-search-modal" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mobileSearchModalLabel" style="color: white; font-weight: 600;">Tìm kiếm</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mobile-search-input-wrapper">
+                        <div class="search-container" style="max-width: 100%;">
+                            <i class="search-icon bi bi-search"></i>
+                            <input type="text" class="search-input form-control" id="mobileSearchInput"
+                                   placeholder="Tìm theo tên truyện, tác giả..."
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="mobileSearchResults">
+                        <!-- results injected by JS -->
+                    </div>
+                    <div class="search-footer" id="mobileSearchFooter" style="display:none;">
+                        <a id="mobileSearchAllLink" href="#">Xem tất cả kết quả</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

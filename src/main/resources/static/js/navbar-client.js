@@ -1,89 +1,160 @@
-  
-        const searchInput = document.getElementById('searchInput');
-        const searchDropdown = document.getElementById('searchDropdown');
-        
-        // Show dropdown when typing
-        searchInput.addEventListener('input', function() {
-            if (this.value.trim().length > 0) {
-                searchDropdown.classList.add('show');
+(function () {
+    'use strict';
+
+    const SEARCH_API = '/api/comics/search?q=';
+    const SEARCH_PAGE = '/search?keyword=';
+    const DEBOUNCE_MS = 280;
+    const MINIO_URL = '';
+
+    function debounce(fn, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    function formatViews(n) {
+        if (!n && n !== 0) return '';
+        if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+        if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+        return String(n);
+    }
+
+    function formatChapterNum(num) {
+        if (!num) return '';
+        return num.stripTrailingZeros ? num.stripTrailingZeros().toPlainString() : num;
+    }
+
+    function getCoverUrl(coverImage) {
+        if (!coverImage) return null;
+        if (coverImage.startsWith('http')) return coverImage;
+        return MINIO_URL + '/comics/' + coverImage;
+    }
+
+    function buildResultHTML(comics, query) {
+        if (!comics || comics.length === 0) {
+            return `<div class="search-result-item" style="justify-content:center;color:#94a3b8;">
+                        Không tìm thấy truyện nào cho "<strong style="color:white;">${escapeHtml(query)}</strong>"
+                    </div>`;
+        }
+        return comics.map(c => {
+            const coverUrl = getCoverUrl(c.coverImage);
+            const img = coverUrl
+                ? `<img src="${coverUrl}" alt="${escapeHtml(c.title)}" class="search-result-thumbnail">`
+                : `<div class="search-result-thumbnail" style="background:#2d1b47;display:flex;align-items:center;justify-content:center;"><i class="bi bi-book" style="color:var(--primary)"></i></div>`;
+            
+            const latestChapter = c.latestChapterNum 
+                ? `<span class="search-result-chapter">Ch. ${formatChapterNum(c.latestChapterNum)}</span>`
+                : `<span class="search-result-chapter">Chưa có chap</span>`;
+            
+            return `<a href="/comic-detail/${c.comicId}" class="search-result-item text-decoration-none">
+                        ${img}
+                        <div class="search-result-info">
+                            <div class="search-result-title">${escapeHtml(c.title)}</div>
+                            ${latestChapter}
+                        </div>
+                    </a>`;
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    async function doSearch(query, resultsEl, footerEl, footerLinkEl, dropdownEl) {
+        if (!query || query.trim().length < 1) {
+            if (dropdownEl) dropdownEl.classList.remove('show');
+            return;
+        }
+        try {
+            const resp = await fetch(SEARCH_API + encodeURIComponent(query.trim()));
+            if (!resp.ok) throw new Error('Search failed');
+            const data = await resp.json();
+            resultsEl.innerHTML = buildResultHTML(data, query);
+            if (footerEl && footerLinkEl) {
+                footerLinkEl.textContent = `Xem tất cả kết quả cho "${query.trim()}"`;
+                footerLinkEl.href = SEARCH_PAGE + encodeURIComponent(query.trim());
+                footerEl.style.display = '';
+            }
+            if (dropdownEl) dropdownEl.classList.add('show');
+        } catch (e) {
+            resultsEl.innerHTML = `<div class="search-result-item" style="color:#ef4444;">Lỗi tìm kiếm. Vui lòng thử lại.</div>`;
+            if (dropdownEl) dropdownEl.classList.add('show');
+        }
+    }
+
+    function initDesktopSearch() {
+        const input = document.getElementById('searchInput');
+        const dropdown = document.getElementById('searchDropdown');
+        const resultsEl = document.getElementById('searchResults');
+        const footerEl = document.getElementById('searchFooter');
+        const footerLink = document.getElementById('searchAllLink');
+        if (!input || !dropdown || !resultsEl) return;
+
+        const debouncedSearch = debounce(q => doSearch(q, resultsEl, footerEl, footerLink, dropdown), DEBOUNCE_MS);
+
+        input.addEventListener('input', function () {
+            const q = this.value.trim();
+            if (q.length === 0) {
+                dropdown.classList.remove('show');
+                footerEl && (footerEl.style.display = 'none');
             } else {
-                searchDropdown.classList.remove('show');
+                debouncedSearch(q);
             }
         });
-        
-        // Show dropdown on focus if there's text
-        searchInput.addEventListener('focus', function() {
-            if (this.value.trim().length > 0) {
-                searchDropdown.classList.add('show');
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                window.location.href = SEARCH_PAGE + encodeURIComponent(this.value.trim());
             }
         });
-        
-        // Hide dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('.search-container')) {
-                searchDropdown.classList.remove('show');
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-container')) {
+                dropdown.classList.remove('show');
             }
         });
-        
-        // Prevent dropdown from closing when clicking inside it
-        searchDropdown.addEventListener('click', function(event) {
-            event.stopPropagation();
+
+        dropdown.addEventListener('click', function (e) {
+            e.stopPropagation();
         });
-    
-    
-    
-    
-        // State management for demo
-        let isLoggedIn = true; // Start with logged in state
-        
-        // Handle logout
-        function handleLogout() {
-            console.log('Logging out...');
-            
-            // Toggle to logged out state
-            isLoggedIn = false;
-            updateAuthUI();
-            
-            // Show alert
-            setTimeout(() => {
-                alert('Đã đăng xuất! Click "Log In" để đăng nhập lại.');
-            }, 100);
-        }
-        
-        // Handle showing login form (simulate login)
-        function showLoginForm() {
-            console.log('Logging in...');
-            
-            // Toggle to logged in state
-            isLoggedIn = true;
-            updateAuthUI();
-            
-            // Show alert
-            setTimeout(() => {
-                alert('Đã đăng nhập thành công!');
-            }, 100);
-        }
-        
-        // Cap nhat giao dien thanh menu
-        function updateAuthUI() {
-            const userSection = document.getElementById('userSection');
-            const authButtons = document.getElementById('authButtons');
-            
-            if (isLoggedIn) {
-                // da dang nhap
-                userSection.classList.remove('d-none');
-                userSection.classList.add('d-flex');
-                authButtons.classList.remove('d-flex');
-                authButtons.classList.add('d-none');
+    }
+
+    function initMobileSearch() {
+        const input = document.getElementById('mobileSearchInput');
+        const resultsEl = document.getElementById('mobileSearchResults');
+        const footerEl = document.getElementById('mobileSearchFooter');
+        const footerLink = document.getElementById('mobileSearchAllLink');
+        if (!input || !resultsEl) return;
+
+        const debouncedSearch = debounce(q => doSearch(q, resultsEl, footerEl, footerLink, null), DEBOUNCE_MS);
+
+        input.addEventListener('input', function () {
+            const q = this.value.trim();
+            if (q.length === 0) {
+                resultsEl.innerHTML = '';
+                footerEl && (footerEl.style.display = 'none');
             } else {
-                // chua dang nhap
-                userSection.classList.remove('d-flex');
-                userSection.classList.add('d-none');
-                authButtons.classList.remove('d-none');
-                authButtons.classList.add('d-flex');
+                debouncedSearch(q);
             }
-        }
-        
-        // Initialize UI on page load
-        updateAuthUI();
- 
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                window.location.href = SEARCH_PAGE + encodeURIComponent(this.value.trim());
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initDesktopSearch();
+        initMobileSearch();
+    });
+})();
+

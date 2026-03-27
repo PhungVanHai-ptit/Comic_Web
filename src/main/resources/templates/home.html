@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MangaRead - Trang chủ</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <style>
+        /* ── Carousel Hero Banner ── */
+        .hero-carousel {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .carousel-item {
+            height: 400px;
+        }
+        @media (min-width: 768px) { .carousel-item { height: 480px; } }
+
+        .carousel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(25, 16, 34, 0.95) 0%, rgba(25, 16, 34, 0.55) 45%, transparent 100%);
+        }
+        .carousel-overlay-2 {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(25, 16, 34, 0.9) 0%, rgba(25, 16, 34, 0.35) 50%, transparent 100%);
+        }
+
+        .carousel-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            max-width: 52rem;
+        }
+        @media (min-width: 768px) { .carousel-content { padding: 2.5rem 3rem; } }
+
+        .carousel-badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background-color: rgba(255, 255, 255, 0.12);
+            color: white;
+        }
+
+        .carousel-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.15;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.35);
+        }
+        @media (min-width: 768px) { .carousel-title { font-size: 2.6rem; } }
+        @media (min-width: 992px) { .carousel-title { font-size: 3.2rem; } }
+
+        .carousel-description {
+            color: #d1d5db;
+            font-size: 0.875rem;
+            line-height: 1.65;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) { .carousel-description { font-size: 0.95rem; -webkit-line-clamp: 3; line-clamp: 3; } }
+
+        /* Desc + button on same row */
+        .carousel-meta-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .carousel-description-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.4rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(140, 37, 244, 0.4);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-read:hover {
+            background-color: #7a1fd6;
+            box-shadow: 0 0 28px rgba(140, 37, 244, 0.6);
+            color: white;
+        }
+
+        /* Carousel controls */
+        .carousel-control-prev, .carousel-control-next { width: 5%; }
+        .carousel-control-prev-icon, .carousel-control-next-icon {
+            background-color: rgba(140, 37, 244, 0.5);
+            border-radius: 50%;
+            padding: 1.25rem;
+        }
+        .carousel-indicators button { background-color: rgba(255,255,255,0.45); }
+        .carousel-indicators button.active { background-color: var(--primary); }
+
+        /* ── Section Headers ── */
+        .section-header {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-browse-all {
+            background-color: rgba(140,37,244,0.1);
+            color: var(--primary);
+            border: none;
+            padding: 0.45rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-browse-all:hover {
+            background-color: rgba(140,37,244,0.2);
+            color: var(--primary);
+        }
+
+        /* ── Manga Card ── */
+        .manga-card { cursor: pointer; text-decoration: none; color: inherit; display: block; }
+
+        .manga-thumbnail {
+            position: relative;
+            aspect-ratio: 2/3;
+            border-radius: 0.65rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .manga-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .manga-card:hover .manga-thumbnail img { transform: scale(1.08); }
+
+        .manga-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .manga-card:hover .manga-overlay { opacity: 0.9; }
+
+        .manga-info { margin-top: 0.45rem; padding: 0 0.1rem; }
+
+        .manga-title-below {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.25rem;
+            transition: color 0.2s;
+        }
+        .manga-card:hover .manga-title-below { color: var(--primary); }
+
+        /* Stats row: views + follows */
+        .manga-stats-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary, #94a3b8);
+            font-size: 0.72rem;
+        }
+        .manga-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .manga-stat .bi { font-size: 0.78rem; }
+        .manga-stat .bi-eye { color: var(--primary); }
+        .manga-stat .bi-heart-fill { color: var(--primary); }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary, #94a3b8);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
+            background-color: rgba(255,255,255,0.04);
+            transition: background-color 0.15s;
+            margin-top: 0.25rem;
+            text-decoration: none;
+        }
+        .chapter-item:hover {
+            background-color: rgba(114,7,222,0.1);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            background-color: #130c1a;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 2.5rem 1rem;
+            margin-top: 2.5rem;
+        }
+        .footer a { color: var(--text-secondary, #94a3b8); text-decoration: none; transition: color 0.2s; }
+        .footer a:hover { color: white; }
+
+        /* Placeholder cover when no image */
+        .cover-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d1b47 0%, #1a0e2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cover-placeholder i { font-size: 2rem; color: rgba(140,37,244,0.5); }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar-client :: navbarClient}"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         HERO BANNER – Top 5 truyện lượt xem cao nhất
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="container-fluid px-3 px-md-4 py-4">
+        <div class="mx-auto" style="max-width: 1280px;">
+
+            <!-- Carousel with bottom-right nav arrows, responsive indicators -->
+            <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+
+                <!-- Indicators – generated dynamically for top 5 slides -->
+                <div class="carousel-indicators" th:if="${topComics != null and !topComics.isEmpty()}">
+                    <button th:each="c, stat : ${topComics}"
+                            type="button"
+                            data-bs-target="#heroCarousel"
+                            th:attr="data-bs-slide-to=${stat.index}"
+                            th:classappend="${stat.first} ? 'active' : ''"></button>
+                </div>
+
+                <div class="carousel-inner">
+                    <!-- ── Dynamic slides from DB ── -->
+                    <div th:each="comic, stat : ${topComics}"
+                         th:classappend="${stat.first} ? 'active' : ''"
+                         class="carousel-item">
+
+                        <!-- Cover image -->
+                        <th:block th:if="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                            <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}"
+                                 th:alt="${comic.title}"
+                                 class="carousel-img">
+                        </th:block>
+                        <th:block th:unless="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                            <div class="carousel-img cover-placeholder">
+                                <i class="bi bi-book-fill"></i>
+                            </div>
+                        </th:block>
+
+                        <div class="carousel-overlay"></div>
+                        <div class="carousel-overlay-2"></div>
+
+                        <div class="carousel-content">
+                            <!-- Genre badges -->
+                            <div class="d-flex flex-wrap gap-2 mb-2" th:if="${comic.genres != null and !comic.genres.isEmpty()}">
+                                <span th:each="genre : ${comic.genres}"
+                                      th:text="${genre.name}"
+                                      class="carousel-badge"></span>
+                            </div>
+
+                            <!-- Title -->
+                            <h2 class="carousel-title mb-2" th:text="${comic.title}">Tên truyện</h2>
+
+                            <!-- Description inline with "Xem thông tin" button -->
+                            <div class="carousel-meta-row">
+                                <div class="carousel-description-wrap">
+                                    <p class="carousel-description mb-0"
+                                       th:text="${comic.description != null ? comic.description : 'Chưa có mô tả.'}">
+                                        Mô tả truyện...
+                                    </p>
+                                </div>
+                                <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}"
+                                   class="btn-read">
+                                    <i class="bi bi-info-circle"></i>
+                                    Xem thông tin
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Fallback nếu không có data từ DB ── -->
+                    <div th:if="${topComics == null or topComics.isEmpty()}" class="carousel-item active">
+                        <div class="carousel-img cover-placeholder">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <div class="carousel-overlay"></div>
+                        <div class="carousel-content">
+                            <h2 class="carousel-title mb-2">Chưa có truyện nào</h2>
+                            <p class="carousel-description mb-3">Hãy thêm truyện vào hệ thống.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         LƯỚI TRUYỆN – 6 card / hàng, lượt xem + tim (follow)
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="container-fluid px-3 px-md-4 py-4">
+        <div class="mx-auto" style="max-width: 1280px;">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <h2 class="section-title mb-0">
+                    <i class="bi bi-clock"></i>
+                    Mới cập nhật
+                </h2>
+                <a th:href="@{/all-comic}" class="btn-browse-all">
+                    Xem tất cả
+                    <i class="bi bi-caret-right"></i>
+                </a>
+            </div>
+
+            <!-- 6 cột trên màn rộng -->
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+
+                <!-- ── Dynamic cards ── -->
+                <div class="col" th:each="comic : ${latestComics}">
+                    <div class="manga-card">
+                        <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="manga-main-link text-decoration-none">
+                            <div class="manga-thumbnail">
+                                <th:block th:if="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                                    <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}" th:alt="${comic.title}">
+                                </th:block>
+                                <th:block th:unless="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
+                                    <div class="cover-placeholder">
+                                        <i class="bi bi-book-fill"></i>
+                                    </div>
+                                </th:block>
+                                <div class="manga-overlay"></div>
+                            </div>
+                            <div class="manga-info">
+                                <div class="manga-title-below" th:text="${comic.title}">Tên truyện</div>
+                                <div class="manga-stats-row">
+                                    <span class="manga-stat">
+                                        <i class="bi bi-eye"></i>
+                                        <span th:text="${#numbers.formatInteger(comic.totalViews ?: 0, 0, 'COMMA')}">0</span>
+                                    </span>
+                                    <span class="manga-stat">
+                                        <i class="bi bi-heart-fill"></i>
+                                        <span th:text="${#numbers.formatInteger(comic.totalFollows ?: 0, 0, 'COMMA')}">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- Latest chapter link (nếu có) -->
+                        <th:block th:if="${comic.chapters != null and !comic.chapters.isEmpty()}">
+                            <a th:href="@{/comic-reading/{id}(id=${comic.chapters[0].chapterId})}"
+                               class="chapter-item text-decoration-none">
+                                <span th:text="'Ch. ' + ${comic.chapters[0].chapterNum.stripTrailingZeros().toPlainString()}">Ch. 1</span>
+                                <span class="chap-time"
+                                      th:attr="data-time=${comic.lastChapterAt}">...</span>
+                            </a>
+                        </th:block>
+
+                        <th:block th:unless="${comic.chapters != null and !comic.chapters.isEmpty()}">
+                            <span class="chapter-item" style="cursor:default;">
+                                <span>Chưa có chapter</span>
+                            </span>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- ── Fallback nếu chưa có truyện ── -->
+                <div class="col-12 text-center py-5 text-secondary" th:if="${latestComics == null or latestComics.isEmpty()}">
+                    <i class="bi bi-book" style="font-size:3rem; opacity:0.3;"></i>
+                    <p class="mt-2">Chưa có truyện nào. Hãy thêm truyện vào hệ thống!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="mx-auto d-flex flex-column flex-md-row justify-content-between align-items-center gap-4" style="max-width: 1280px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-book" style="color: var(--primary);"></i>
+                    <span class="fw-bold">MangaRead</span>
+                </div>
+                <div class="d-flex gap-4">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">DMCA</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div style="font-size: 0.75rem; opacity: 0.6;">
+                    © 2025 MangaRead. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/navbar-client.js"></script>
+    <script>
+    // ── Thời gian tương đối cho chapter ─────────────────────────────
+    (function () {
+        function relativeTime(isoStr) {
+            if (!isoStr) return '';
+            // Thymeleaf renders LocalDateTime as "2025-03-23T10:30:00"
+            var d = new Date(isoStr);
+            var now = new Date();
+            var diffMs = now - d;
+            var diffSec = Math.floor(diffMs / 1000);
+            var diffMin = Math.floor(diffSec / 60);
+            var diffHour = Math.floor(diffMin / 60);
+            var diffDay = Math.floor(diffHour / 24);
+            if (diffSec < 60)  return 'Vừa xong';
+            if (diffMin < 60)  return diffMin + ' phút trước';
+            if (diffHour < 24) return diffHour + ' giờ trước';
+            if (diffDay < 7)   return diffDay + ' ngày trước';
+            // Quá 7 ngày → hiện dd/MM/yyyy
+            var dd = String(d.getDate()).padStart(2,'0');
+            var mm = String(d.getMonth()+1).padStart(2,'0');
+            var yyyy = d.getFullYear();
+            return dd + '/' + mm + '/' + yyyy;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.chap-time[data-time]').forEach(function (el) {
+                el.textContent = relativeTime(el.getAttribute('data-time'));
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
