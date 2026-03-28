@@ -1,17 +1,14 @@
 package com.haiphung.comic_web.controller;
 
-import com.haiphung.comic_web.entity.Comment;
-import com.haiphung.comic_web.repository.CommentRepository;
+import com.haiphung.comic_web.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/comments")
@@ -19,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminCommentController {
 
-    private final CommentRepository commentRepository;
+    private final CommentService commentService;
 
     @GetMapping
     public String listComments(
@@ -28,32 +25,27 @@ public class AdminCommentController {
             @RequestParam(required = false) String keyword,
             Model model) {
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> comments;
+        Map<String, Object> result = commentService.getAllCommentsForAdmin(page, size, keyword);
         
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            comments = commentRepository.findByContentContainingIgnoreCase(keyword.trim(), pageable);
-        } else {
-            comments = commentRepository.findAll(pageable);
-        }
-        
-        model.addAttribute("comments", comments.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", comments.getTotalPages());
-        model.addAttribute("totalElements", comments.getTotalElements());
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("comments", result.get("comments"));
+        model.addAttribute("currentPage", result.get("currentPage"));
+        model.addAttribute("totalPages", result.get("totalPages"));
+        model.addAttribute("totalElements", result.get("totalElements"));
+        model.addAttribute("keyword", result.get("keyword"));
         
         return "admin-comments";
     }
 
     @PostMapping("/delete/{id}")
     public String deleteComment(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        if (commentRepository.existsById(id)) {
-            commentRepository.deleteById(id);
-            redirectAttributes.addFlashAttribute("success", "Xóa bình luận thành công!");
+        Map<String, Object> result = commentService.deleteCommentAsAdmin(id);
+        
+        if ((Boolean) result.get("success")) {
+            redirectAttributes.addFlashAttribute("success", result.get("message"));
         } else {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy bình luận");
+            redirectAttributes.addFlashAttribute("error", result.get("message"));
         }
+        
         return "redirect:/admin/comments";
     }
 }

@@ -213,7 +213,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.75rem; /* Reduced horizontal padding to 12px (0.75rem) */
     border: none;
 }
 
@@ -226,7 +226,7 @@ body {
 }
 
 .table tbody td {
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.75rem; /* Reduced horizontal padding to 12px (0.75rem) */
     vertical-align: middle;
     border: none;
 }

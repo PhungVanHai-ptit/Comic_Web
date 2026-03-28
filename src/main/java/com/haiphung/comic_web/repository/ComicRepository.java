@@ -29,10 +29,11 @@ public interface ComicRepository extends JpaRepository<Comic, Integer> {
            "LOWER(g.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Comic> searchComics(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT DISTINCT c FROM Comic c LEFT JOIN c.genres g WHERE " +
-           "(:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(c.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-           "(:status IS NULL OR c.status = :status) AND " +
-           "(:genreId IS NULL OR g.genreId = :genreId)")
+    @Query("SELECT c FROM Comic c WHERE " +
+            "(:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(c.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(:status IS NULL OR c.status = :status) AND " +
+            "(:genreId IS NULL OR EXISTS (SELECT 1 FROM c.genres g WHERE g.genreId = :genreId))")
+         // Đổi từ LEFT JOIN thành EXISTS
     Page<Comic> searchAdvanced(@Param("keyword") String keyword,
                                @Param("status") String status,
                                @Param("genreId") Integer genreId,

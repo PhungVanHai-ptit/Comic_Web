@@ -47,6 +47,15 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Integer id) {
+        userRepository.findById(id).ifPresent(user -> {
+            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                try {
+                    minioService.deleteAvatar(user.getAvatarUrl());
+                } catch (Exception e) {
+                    System.err.println("Error deleting avatar during user deletion: " + e.getMessage());
+                }
+            }
+        });
         userRepository.deleteById(id);
     }
 
@@ -98,8 +107,9 @@ public class UserService {
     /**
      * Delete user by ID
      */
+    @Transactional
     public void deleteById(Integer id) {
-        userRepository.deleteById(id);
+        deleteUser(id);
     }
 
     /**

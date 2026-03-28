@@ -63,10 +63,9 @@
 
         /* ── Filter Bar ── */
         .filter-bar {
-            position: sticky;
-            top: 56px;
-            z-index: 40;
-            background-color: rgba(25,16,34,0.95);
+            position: relative;
+            z-index: 50;
+            background-color: rgba(25, 16, 34, 0.95);
             backdrop-filter: blur(12px);
             padding: 0.875rem 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -396,7 +395,7 @@
             <div class="row align-items-center">
                 <div class="col-sm-6 mb-3 mb-sm-0">
                     <p class="pagination-info mb-0">
-                        Hiển thị <span th:text="${currentPage * 30 + 1}">1</span>–<span th:text="${T(java.lang.Math).min((currentPage + 1) * 30, totalElements)}">30</span> trong tổng số <span th:text="${totalElements}">0</span> kết quả
+                        Hiển thị <span th:text="${currentPage * 12 + 1}">1</span>–<span th:text="${(currentPage + 1) * 12 < totalElements ? (currentPage + 1) * 12 : totalElements}">12</span> trong tổng số <span th:text="${totalElements}">0</span> kết quả
                     </p>
                 </div>
                 <div class="col-sm-6">

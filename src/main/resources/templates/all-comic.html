@@ -252,6 +252,28 @@
                 </div>
                 <div class="col-md-6 mt-3 mt-md-0">
                     <div class="d-flex flex-nowrap gap-2 justify-content-md-end align-items-center">
+                        <!-- Status Dropdown -->
+                        <div class="dropdown">
+                            <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" id="statusDropdown">
+                                <i class="bi bi-info-circle" style="color:var(--text-secondary);"></i>
+                                <span class="filter-label">Trạng thái:</span>
+                                <span class="filter-value" id="statusLabel" th:data-status="${currentStatus}">
+                                    <th:block th:if="${currentStatus == 'Đang ra'}">Đang ra</th:block>
+                                    <th:block th:if="${currentStatus == 'Hoàn thành'}">Hoàn thành</th:block>
+                                    <th:block th:if="${currentStatus == 'Dropped'}">Dropped</th:block>
+                                    <th:block th:if="${currentStatus == null or currentStatus == ''}">Tất cả</th:block>
+                                </span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <ul class="dropdown-menu filter-dropdown-menu" id="statusMenu">
+                                <li><a class="dropdown-item" th:classappend="${currentStatus == null or currentStatus == ''} ? 'active'" href="#" data-status=""><i class="bi bi-grid"></i> Tất cả</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentStatus == 'Đang ra'} ? 'active'" href="#" data-status="Đang ra"><i class="bi bi-play-circle"></i> Đang ra</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentStatus == 'Hoàn thành'} ? 'active'" href="#" data-status="Hoàn thành"><i class="bi bi-check-circle"></i> Hoàn thành</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentStatus == 'Dropped'} ? 'active'" href="#" data-status="Dropped"><i class="bi bi-x-circle"></i> Dropped</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Sort Dropdown -->
                         <div class="dropdown">
                             <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" id="sortDropdown">
                                 <i class="bi bi-sort-down" style="color:var(--text-secondary);"></i>
@@ -265,10 +287,10 @@
                                 <i class="bi bi-chevron-down"></i>
                             </button>
                             <ul class="dropdown-menu filter-dropdown-menu" id="sortMenu">
-                                <li><a class="dropdown-item" th:classappend="${currentSort == 'latest'} ? 'active'" href="#" data-value="Mới nhất" data-sort="latest"><i class="bi bi-clock"></i> Mới nhất <i class="bi bi-check2 sort-check" th:style="${currentSort == 'latest'} ? '' : 'display:none'"></i></a></li>
-                                <li><a class="dropdown-item" th:classappend="${currentSort == 'views'} ? 'active'" href="#" data-value="Lượt xem" data-sort="views"><i class="bi bi-eye"></i> Lượt xem <i class="bi bi-check2 sort-check" th:style="${currentSort == 'views'} ? '' : 'display:none'"></i></a></li>
-                                <li><a class="dropdown-item" th:classappend="${currentSort == 'az'} ? 'active'" href="#" data-value="A → Z" data-sort="az"><i class="bi bi-sort-alpha-down"></i> A → Z <i class="bi bi-check2 sort-check" th:style="${currentSort == 'az'} ? '' : 'display:none'"></i></a></li>
-                                <li><a class="dropdown-item" th:classappend="${currentSort == 'za'} ? 'active'" href="#" data-value="Z → A" data-sort="za"><i class="bi bi-sort-alpha-up"></i> Z → A <i class="bi bi-check2 sort-check" th:style="${currentSort == 'za'} ? '' : 'display:none'"></i></a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentSort == 'latest' or currentSort == null} ? 'active'" href="#" data-sort="latest"><i class="bi bi-clock"></i> Mới nhất</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentSort == 'views'} ? 'active'" href="#" data-sort="views"><i class="bi bi-eye"></i> Lượt xem</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentSort == 'az'} ? 'active'" href="#" data-sort="az"><i class="bi bi-sort-alpha-down"></i> A → Z</a></li>
+                                <li><a class="dropdown-item" th:classappend="${currentSort == 'za'} ? 'active'" href="#" data-sort="za"><i class="bi bi-sort-alpha-up"></i> Z → A</a></li>
                             </ul>
                         </div>
                     </div>
@@ -335,7 +357,7 @@
             <div class="row align-items-center">
                 <div class="col-sm-6 mb-3 mb-sm-0">
                     <p class="pagination-info mb-0">
-                        Hiển thị <span th:text="${currentPage * 30 + 1}">1</span>–<span th:text="${T(java.lang.Math).min((currentPage + 1) * 30, totalElements)}">30</span> trong tổng số <span th:text="${totalElements}">0</span> kết quả
+                        Hiển thị <span th:text="${currentPage * 12 + 1}">1</span>–<span th:text="${(currentPage + 1) * 12 < totalElements ? (currentPage + 1) * 12 : totalElements}">12</span> trong tổng số <span th:text="${totalElements}">0</span> kết quả
                     </p>
                 </div>
                 <div class="col-sm-6">
@@ -395,16 +417,29 @@
             document.querySelectorAll('.chap-time[data-time]').forEach(function (el) {
                 el.textContent = relativeTime(el.getAttribute('data-time'));
             });
-        });
 
-        document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
-            menu.querySelectorAll('.dropdown-item').forEach(item => {
+            // Handle sort and status filters
+            document.querySelectorAll('.filter-dropdown-menu .dropdown-item').forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const sortValue = this.dataset.sort;
-                    window.location.href = `/all-comic?page=0&sort=${sortValue}`;
+                    let url = new URL(window.location.href, window.location.origin);
+                    let sort = this.dataset.sort;
+                    let status = this.dataset.status;
+
+                    url.searchParams.set('page', '0');
+                    if (sort !== undefined) {
+                        url.searchParams.set('sort', sort);
+                    }
+                    if (status !== undefined) {
+                        if (status) url.searchParams.set('status', status);
+                        else url.searchParams.delete('status');
+                    }
+                    
+                    window.location.href = url.pathname + url.search;
                 });
             });
+
+            renderPagination(currentPage);
         });
 
         function renderPagination(page) {
@@ -422,7 +457,9 @@
                 if (!disabled) {
                     a.addEventListener('click', e => {
                         e.preventDefault();
-                        window.location.href = `/all-comic?page=${pageNum}&sort=${CURRENT_SORT}`;
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('page', pageNum);
+                        window.location.href = url.pathname + url.search;
                     });
                 }
                 li.appendChild(a);
@@ -453,7 +490,6 @@
             addItem('<i class="bi bi-chevron-right"></i>', page + 1, page === TOTAL_PAGES - 1, false, true);
         }
 
-        renderPagination(currentPage);
     </script>
 </body>
 </html>

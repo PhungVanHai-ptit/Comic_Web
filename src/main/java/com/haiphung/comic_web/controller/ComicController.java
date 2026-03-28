@@ -1,10 +1,7 @@
 package com.haiphung.comic_web.controller;
 
 import com.haiphung.comic_web.config.CustomUserDetails;
-import com.haiphung.comic_web.entity.Chapter;
-import com.haiphung.comic_web.entity.Comment;
-import com.haiphung.comic_web.entity.Comic;
-import com.haiphung.comic_web.entity.User;
+import com.haiphung.comic_web.entity.*;
 import com.haiphung.comic_web.repository.CommentRepository;
 import com.haiphung.comic_web.repository.FollowRepository;
 import com.haiphung.comic_web.service.ChapterService;
@@ -56,8 +53,9 @@ public class ComicController {
 
     @GetMapping("/all-comic")
     public String allComic(@RequestParam(value = "page", defaultValue = "0") int page,
-                          @RequestParam(value = "sort", defaultValue = "latest") String sort,
-                          Model model) {
+                           @RequestParam(value = "sort", defaultValue = "latest") String sort,
+                           @RequestParam(value = "status", required = false) String status,
+                           Model model) {
         Sort sortOrder;
         switch (sort) {
             case "views":
@@ -75,14 +73,28 @@ public class ComicController {
                 break;
         }
 
-        Pageable pageable = PageRequest.of(page, 30, sortOrder);
-        Page<Comic> comics = comicService.getAllComics(pageable);
+        int pageSize = 12;
+        Pageable pageable = PageRequest.of(page, pageSize, sortOrder);
+        Page<Comic> comics = comicService.searchAdvanced(null, status, null, pageable);
+
+        // DEBUG LOG - Xóa sau khi fix xong
+        System.out.println("========== DEBUG INFO ==========");
+        System.out.println("Requested Page: " + page);
+        System.out.println("Page Size: " + pageSize);
+        System.out.println("Total Pages: " + comics.getTotalPages());
+        System.out.println("Total Elements: " + comics.getTotalElements());
+        System.out.println("Current Page Content Size: " + comics.getContent().size());
+        System.out.println("Sort: " + sort);
+        System.out.println("Status: " + status);
+        System.out.println("================================");
 
         model.addAttribute("comics", comics.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", comics.getTotalPages());
         model.addAttribute("totalElements", comics.getTotalElements());
+        model.addAttribute("pageSize", pageSize);  // ← THÊM DÒNG NÀY
         model.addAttribute("currentSort", sort);
+        model.addAttribute("currentStatus", status);
         model.addAttribute("minioUrl", minioUrl);
         model.addAttribute("allGenres", genreService.getAllGenresSorted());
 
@@ -96,7 +108,7 @@ public class ComicController {
                                Model model) {
         User currentUser = (userDetails != null) ? userDetails.getUser() : null;
         Optional<Comic> comicOpt = comicService.getComicById(id);
-        if (comicOpt.isEmpty()) {
+        if (!comicOpt.isPresent()) {
             return "redirect:/all-comic";
         }
 
@@ -133,7 +145,7 @@ public class ComicController {
             return "redirect:/auth/login?required";
         }
 
-        Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, 24, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Comic> followingComics = followRepository.findComicsByUserId(currentUser.getUserId(), pageable);
 
         model.addAttribute("followingComics", followingComics.getContent());
@@ -152,7 +164,7 @@ public class ComicController {
                                 @RequestParam(value = "sort", defaultValue = "latest") String sort,
                                 Model model) {
         
-        com.haiphung.comic_web.entity.Genre genre = genreService.getGenreById(id).orElse(null);
+        Genre genre = genreService.getGenreById(id).orElse(null);
         if (genre == null) {
             return "redirect:/all-comic";
         }
@@ -174,7 +186,7 @@ public class ComicController {
                 break;
         }
 
-        Pageable pageable = PageRequest.of(page, 30, sortOrder);
+        Pageable pageable = PageRequest.of(page, 12, sortOrder);
         Page<Comic> comics = comicService.getComicsByGenre(id, pageable);
 
         model.addAttribute("genre", genre);

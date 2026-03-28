@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +101,58 @@ public class CommentService {
         response.put("totalPages", commentsPage.getTotalPages());
         response.put("totalElements", commentsPage.getTotalElements());
         return response;
+    }
+
+    // ===== Admin Operations =====
+    public Map<String, Object> getAllCommentsForAdmin(int page, int size, String keyword) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Page<Comment> comments;
+            
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                comments = commentRepository.findByContentContainingIgnoreCase(keyword.trim(), pageable);
+            } else {
+                comments = commentRepository.findAll(pageable);
+            }
+            
+            response.put("success", true);
+            response.put("comments", comments.getContent());
+            response.put("currentPage", page);
+            response.put("totalPages", comments.getTotalPages());
+            response.put("totalElements", comments.getTotalElements());
+            response.put("keyword", keyword);
+            
+            return response;
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi tải danh sách bình luận: " + e.getMessage());
+            return response;
+        }
+    }
+
+    @Transactional
+    public Map<String, Object> deleteCommentAsAdmin(Integer commentId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            if (!commentRepository.existsById(commentId)) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy bình luận");
+                return response;
+            }
+            
+            commentRepository.deleteById(commentId);
+            response.put("success", true);
+            response.put("message", "Xóa bình luận thành công!");
+            
+            return response;
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi khi xóa bình luận: " + e.getMessage());
+            return response;
+        }
     }
 
     private CommentResponseDTO mapToDTO(Comment comment) {

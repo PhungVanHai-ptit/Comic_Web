@@ -387,9 +387,17 @@
                         <div class="carousel-content">
                             <!-- Genre badges -->
                             <div class="d-flex flex-wrap gap-2 mb-2"
-                                th:if="${comic.genres != null and !comic.genres.isEmpty()}">
-                                <span th:each="genre : ${comic.genres}" th:text="${genre.name}"
-                                    class="carousel-badge"></span>
+                                 th:if="${comic.genres != null and !comic.genres.isEmpty()}">
+
+                                <span th:each="genre, stat : ${comic.genres}"
+                                      th:if="${stat.index < 5}"
+                                      th:text="${genre.name}"
+                                      class="carousel-badge">
+                                </span>
+                                <span th:if="${#lists.size(comic.genres) > 5}"
+                                      class="carousel-badge" style="background-color: rgba(255, 255, 255, 0.2);">
+                                    +<span th:text="${#lists.size(comic.genres) - 5}"></span>
+                                </span>
                             </div>
 
                             <!-- Title -->
