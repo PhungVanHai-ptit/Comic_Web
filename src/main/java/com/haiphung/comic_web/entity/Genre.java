@@ -7,6 +7,7 @@ import java.util.List;
 @Entity
 @Table(name = "genres")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode(of = "genreId")
 public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

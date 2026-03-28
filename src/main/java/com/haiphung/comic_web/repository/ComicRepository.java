@@ -22,12 +22,12 @@ public interface ComicRepository extends JpaRepository<Comic, Integer> {
 
     boolean existsByTitleIgnoreCaseAndComicIdNot(String name, Integer id);
 
-//    @Query("SELECT DISTINCT c FROM Comic c LEFT JOIN c.genres g WHERE " +
-//           "LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-//           "LOWER(c.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-//           "LOWER(c.status) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-//           "LOWER(g.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-//    Page<Comic> searchComics(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT DISTINCT c FROM Comic c LEFT JOIN c.genres g WHERE " +
+           "LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.author) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.status) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(g.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Comic> searchComics(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT DISTINCT c FROM Comic c LEFT JOIN c.genres g WHERE " +
            "(:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(c.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +

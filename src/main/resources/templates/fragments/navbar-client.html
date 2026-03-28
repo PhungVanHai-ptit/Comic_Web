@@ -10,7 +10,11 @@
     <!-- Header -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid px-3 px-lg-5">
+            <!-- Global Config for JS -->
+            <div id="navbar-config" th:data-minio-url="${minioUrl}" style="display:none;"></div>
+            
             <a class="navbar-brand" th:href="@{/}">
+
                 <i class="bi bi-book" style="color: var(--primary); font-size: 1.5rem; text-shadow: 1px 0 currentColor, -1px 0 currentColor, 0 1px currentColor, 0 -1px currentColor;"></i>
                 MangaRead
             </a>

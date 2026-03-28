@@ -113,7 +113,7 @@ public class AdminChapterController {
             @PathVariable Integer comicId,
             @PathVariable Integer chapterId,
             @ModelAttribute Chapter chapter,
-            @RequestParam(value = "keptImageIndices", required = false) String keptImageIndices,
+            @RequestParam(value = "unifiedOrder", required = false) String unifiedOrder,
             @RequestParam(value = "images", required = false) MultipartFile[] files,
             RedirectAttributes redirectAttributes) {
             
@@ -129,13 +129,13 @@ public class AdminChapterController {
         
         Chapter savedChapter = adminChapterService.saveChapter(existing);
 
-        // Check if user made any image changes (removed/reordered/added images)
+        // Check if user made any image changes
         boolean hasNewFiles = files != null && files.length > 0 && !files[0].isEmpty();
-        boolean hasChanges = hasNewFiles || (keptImageIndices != null && !keptImageIndices.trim().isEmpty());
+        boolean hasChanges = (unifiedOrder != null && !unifiedOrder.trim().isEmpty());
         
         if (hasChanges) {
             try {
-                adminChapterService.updateChapterImagesWithOrder(savedChapter, keptImageIndices, hasNewFiles ? files : new MultipartFile[0]);
+                adminChapterService.updateChapterImagesWithOrder(savedChapter, unifiedOrder, hasNewFiles ? files : new MultipartFile[0]);
                 redirectAttributes.addFlashAttribute("success", "Cập nhật chapter và ảnh thành công!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("error", e.getMessage());

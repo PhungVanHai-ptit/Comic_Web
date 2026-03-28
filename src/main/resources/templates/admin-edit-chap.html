@@ -236,7 +236,13 @@
             previewGrid.innerHTML = '';
             pageCount.textContent = allImages.length + ' Trang';
 
+            // We need to keep track of new file indices for the unifiedOrder string later
+            let newFileIdx = 0;
             allImages.forEach((img, index) => {
+                if (img.type === 'new') {
+                    img.newFileIndex = newFileIdx++;
+                }
+
                 const col = document.createElement('div');
                 col.className = 'col-6 col-sm-4 col-md-3 col-lg-2';
                 col.draggable = true;
@@ -256,11 +262,11 @@
 
                 const badge = `<div class="page-number" style="position:absolute;top:0.5rem;left:0.5rem;
                     background:var(--primary);color:#fff;padding:0.25rem 0.5rem;
-                    border-radius:0.25rem;font-size:0.75rem;font-weight:700;">${index + 1}</div>`;
+                    border-radius:0.25rem;font-size:0.75rem;font-weight:700;z-index:2;">${index + 1}</div>`;
 
                 const newBadge = img.type === 'new' ? `<div style="position:absolute;bottom:2rem;left:0.5rem;
                     background:rgba(34,197,94,0.9);color:#fff;font-size:0.6rem;font-weight:700;
-                    padding:0.1rem 0.4rem;border-radius:0.25rem;">MỚI</div>` : '';
+                    padding:0.1rem 0.4rem;border-radius:0.25rem;z-index:2;">MỚI</div>` : '';
 
                 if (img.type === 'existing') {
                     col.innerHTML = `
@@ -272,7 +278,15 @@
                     setupDragEvents(col, index);
                     previewGrid.appendChild(col);
                 } else {
-                    // New file — read with FileReader
+                    // Pre-fill HTML so page number shows up IMMEDIATELY before reader.onload
+                    col.innerHTML = `
+                        <div style="position:relative;aspect-ratio:2/3;border-radius:0.5rem;overflow:hidden;border:1px solid rgba(34,197,94,0.5);background:rgba(255,255,255,0.05);">
+                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                                <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+                            </div>
+                            ${badge}${newBadge}${xBtn}
+                        </div>`;
+                    
                     const reader = new FileReader();
                     reader.onload = e2 => {
                         col.innerHTML = `
@@ -284,6 +298,7 @@
                         setupDragEvents(col, index);
                     };
                     reader.readAsDataURL(img.file);
+                    setupDragEvents(col, index); // Also setup events immediately so it can be dragged while loading
                     previewGrid.appendChild(col);
                 }
             });
@@ -355,22 +370,22 @@
                 return;
             }
 
-            // Build keptImageIndices: comma-separated original indices of existing images in current order
-            const keptIndices = allImages
-                .filter(img => img.type === 'existing')
-                .map(img => img.origIndex)
-                .join(',');
+            // Build unifiedOrder: e.g. "existing:1,new:0,existing:2"
+            const orderStr = allImages.map(img => {
+                if (img.type === 'existing') return `existing:${img.origIndex}`;
+                else return `new:${img.newFileIndex}`;
+            }).join(',');
 
             // Set hidden field
-            let keptField = document.getElementById('keptImageIndicesField');
-            if (!keptField) {
-                keptField = document.createElement('input');
-                keptField.type = 'hidden';
-                keptField.name = 'keptImageIndices';
-                keptField.id = 'keptImageIndicesField';
-                document.getElementById('chapterForm').appendChild(keptField);
+            let orderField = document.getElementById('unifiedOrderField');
+            if (!orderField) {
+                orderField = document.createElement('input');
+                orderField.type = 'hidden';
+                orderField.name = 'unifiedOrder';
+                orderField.id = 'unifiedOrderField';
+                document.getElementById('chapterForm').appendChild(orderField);
             }
-            keptField.value = keptIndices;
+            orderField.value = orderStr;
 
             // Build new files DataTransfer
             const newFiles = allImages.filter(img => img.type === 'new').map(img => img.file);

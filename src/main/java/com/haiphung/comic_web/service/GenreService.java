@@ -3,6 +3,8 @@ package com.haiphung.comic_web.service;
 import com.haiphung.comic_web.entity.Genre;
 import com.haiphung.comic_web.repository.GenreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,6 +29,7 @@ public class GenreService {
         return genreRepository.findAllById(ids);
     }
 
+    @Cacheable("allGenres")
     public List<Genre> getAllGenresSorted() {
         return genreRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
     }
@@ -49,11 +52,13 @@ public class GenreService {
     }
 
     @Transactional
+    @CacheEvict(value = "allGenres", allEntries = true)
     public Genre saveGenre(Genre genre) {
         return genreRepository.save(genre);
     }
 
     @Transactional
+    @CacheEvict(value = "allGenres", allEntries = true)
     public void deleteGenre(Integer id) {
         genreRepository.deleteById(id);
     }

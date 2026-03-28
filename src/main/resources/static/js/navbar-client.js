@@ -4,7 +4,7 @@
     const SEARCH_API = '/api/comics/search?q=';
     const SEARCH_PAGE = '/search?keyword=';
     const DEBOUNCE_MS = 280;
-    const MINIO_URL = '';
+    let MINIO_URL = '';
 
     function debounce(fn, delay) {
         let timer;
@@ -43,11 +43,11 @@
             const img = coverUrl
                 ? `<img src="${coverUrl}" alt="${escapeHtml(c.title)}" class="search-result-thumbnail">`
                 : `<div class="search-result-thumbnail" style="background:#2d1b47;display:flex;align-items:center;justify-content:center;"><i class="bi bi-book" style="color:var(--primary)"></i></div>`;
-            
-            const latestChapter = c.latestChapterNum 
+
+            const latestChapter = c.latestChapterNum
                 ? `<span class="search-result-chapter">Ch. ${formatChapterNum(c.latestChapterNum)}</span>`
                 : `<span class="search-result-chapter">Chưa có chap</span>`;
-            
+
             return `<a href="/comic-detail/${c.comicId}" class="search-result-item text-decoration-none">
                         ${img}
                         <div class="search-result-info">
@@ -152,9 +152,18 @@
         });
     }
 
+    function initConfig() {
+        const configEl = document.getElementById('navbar-config');
+        if (configEl) {
+            MINIO_URL = configEl.getAttribute('data-minio-url') || '';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        initConfig();
         initDesktopSearch();
         initMobileSearch();
     });
 })();
+
 

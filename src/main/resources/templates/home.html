@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MangaRead - Trang chủ</title>
 
     <!-- Bootstrap CSS -->
@@ -22,7 +23,12 @@
         .carousel-item {
             height: 400px;
         }
-        @media (min-width: 768px) { .carousel-item { height: 480px; } }
+
+        @media (min-width: 768px) {
+            .carousel-item {
+                height: 480px;
+            }
+        }
 
         .carousel-img {
             width: 100%;
@@ -35,6 +41,7 @@
             inset: 0;
             background: linear-gradient(to top, rgba(25, 16, 34, 0.95) 0%, rgba(25, 16, 34, 0.55) 45%, transparent 100%);
         }
+
         .carousel-overlay-2 {
             position: absolute;
             inset: 0;
@@ -49,7 +56,12 @@
             padding: 2rem;
             max-width: 52rem;
         }
-        @media (min-width: 768px) { .carousel-content { padding: 2.5rem 3rem; } }
+
+        @media (min-width: 768px) {
+            .carousel-content {
+                padding: 2.5rem 3rem;
+            }
+        }
 
         .carousel-badge {
             display: inline-block;
@@ -67,10 +79,20 @@
             font-size: 1.8rem;
             font-weight: 900;
             line-height: 1.15;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.35);
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
         }
-        @media (min-width: 768px) { .carousel-title { font-size: 2.6rem; } }
-        @media (min-width: 992px) { .carousel-title { font-size: 3.2rem; } }
+
+        @media (min-width: 768px) {
+            .carousel-title {
+                font-size: 2.6rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .carousel-title {
+                font-size: 3.2rem;
+            }
+        }
 
         .carousel-description {
             color: #d1d5db;
@@ -82,7 +104,14 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        @media (min-width: 768px) { .carousel-description { font-size: 0.95rem; -webkit-line-clamp: 3; line-clamp: 3; } }
+
+        @media (min-width: 768px) {
+            .carousel-description {
+                font-size: 0.95rem;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+            }
+        }
 
         /* Desc + button on same row */
         .carousel-meta-row {
@@ -114,6 +143,7 @@
             text-decoration: none;
             white-space: nowrap;
         }
+
         .btn-read:hover {
             background-color: #7a1fd6;
             box-shadow: 0 0 28px rgba(140, 37, 244, 0.6);
@@ -121,21 +151,33 @@
         }
 
         /* Carousel controls */
-        .carousel-control-prev, .carousel-control-next { width: 5%; }
-        .carousel-control-prev-icon, .carousel-control-next-icon {
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 5%;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
             background-color: rgba(140, 37, 244, 0.5);
             border-radius: 50%;
             padding: 1.25rem;
         }
-        .carousel-indicators button { background-color: rgba(255,255,255,0.45); }
-        .carousel-indicators button.active { background-color: var(--primary); }
+
+        .carousel-indicators button {
+            background-color: rgba(255, 255, 255, 0.45);
+        }
+
+        .carousel-indicators button.active {
+            background-color: var(--primary);
+        }
 
         /* ── Section Headers ── */
         .section-header {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             padding-bottom: 1.25rem;
             margin-bottom: 1.5rem;
         }
+
         .section-title {
             font-size: 1.4rem;
             font-weight: 700;
@@ -143,8 +185,9 @@
             align-items: center;
             gap: 0.5rem;
         }
+
         .btn-browse-all {
-            background-color: rgba(140,37,244,0.1);
+            background-color: rgba(140, 37, 244, 0.1);
             color: var(--primary);
             border: none;
             padding: 0.45rem 1rem;
@@ -156,39 +199,55 @@
             align-items: center;
             gap: 0.3rem;
         }
+
         .btn-browse-all:hover {
-            background-color: rgba(140,37,244,0.2);
+            background-color: rgba(140, 37, 244, 0.2);
             color: var(--primary);
         }
 
         /* ── Manga Card ── */
-        .manga-card { cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .manga-card {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
 
         .manga-thumbnail {
             position: relative;
             aspect-ratio: 2/3;
             border-radius: 0.65rem;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
+
         .manga-thumbnail img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s;
         }
-        .manga-card:hover .manga-thumbnail img { transform: scale(1.08); }
+
+        .manga-card:hover .manga-thumbnail img {
+            transform: scale(1.08);
+        }
 
         .manga-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 55%);
             opacity: 0.7;
             transition: opacity 0.3s;
         }
-        .manga-card:hover .manga-overlay { opacity: 0.9; }
 
-        .manga-info { margin-top: 0.45rem; padding: 0 0.1rem; }
+        .manga-card:hover .manga-overlay {
+            opacity: 0.9;
+        }
+
+        .manga-info {
+            margin-top: 0.45rem;
+            padding: 0 0.1rem;
+        }
 
         .manga-title-below {
             font-size: 0.85rem;
@@ -200,7 +259,10 @@
             margin-bottom: 0.25rem;
             transition: color 0.2s;
         }
-        .manga-card:hover .manga-title-below { color: var(--primary); }
+
+        .manga-card:hover .manga-title-below {
+            color: var(--primary);
+        }
 
         /* Stats row: views + follows */
         .manga-stats-row {
@@ -210,14 +272,24 @@
             color: var(--text-secondary, #94a3b8);
             font-size: 0.72rem;
         }
+
         .manga-stat {
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
-        .manga-stat .bi { font-size: 0.78rem; }
-        .manga-stat .bi-eye { color: var(--primary); }
-        .manga-stat .bi-heart-fill { color: var(--primary); }
+
+        .manga-stat .bi {
+            font-size: 0.78rem;
+        }
+
+        .manga-stat .bi-eye {
+            color: var(--primary);
+        }
+
+        .manga-stat .bi-heart-fill {
+            color: var(--primary);
+        }
 
         .chapter-item {
             display: flex;
@@ -227,13 +299,14 @@
             color: var(--text-secondary, #94a3b8);
             padding: 0.2rem 0.4rem;
             border-radius: 0.3rem;
-            background-color: rgba(255,255,255,0.04);
+            background-color: rgba(255, 255, 255, 0.04);
             transition: background-color 0.15s;
             margin-top: 0.25rem;
             text-decoration: none;
         }
+
         .chapter-item:hover {
-            background-color: rgba(114,7,222,0.1);
+            background-color: rgba(114, 7, 222, 0.1);
             color: var(--primary);
             font-weight: 700;
         }
@@ -241,12 +314,20 @@
         /* ── Footer ── */
         .footer {
             background-color: #130c1a;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding: 2.5rem 1rem;
             margin-top: 2.5rem;
         }
-        .footer a { color: var(--text-secondary, #94a3b8); text-decoration: none; transition: color 0.2s; }
-        .footer a:hover { color: white; }
+
+        .footer a {
+            color: var(--text-secondary, #94a3b8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
 
         /* Placeholder cover when no image */
         .cover-placeholder {
@@ -257,9 +338,14 @@
             align-items: center;
             justify-content: center;
         }
-        .cover-placeholder i { font-size: 2rem; color: rgba(140,37,244,0.5); }
+
+        .cover-placeholder i {
+            font-size: 2rem;
+            color: rgba(140, 37, 244, 0.5);
+        }
     </style>
 </head>
+
 <body>
     <div th:replace="~{fragments/navbar-client :: navbarClient}"></div>
 
@@ -274,24 +360,20 @@
 
                 <!-- Indicators – generated dynamically for top 5 slides -->
                 <div class="carousel-indicators" th:if="${topComics != null and !topComics.isEmpty()}">
-                    <button th:each="c, stat : ${topComics}"
-                            type="button"
-                            data-bs-target="#heroCarousel"
-                            th:attr="data-bs-slide-to=${stat.index}"
-                            th:classappend="${stat.first} ? 'active' : ''"></button>
+                    <button th:each="c, stat : ${topComics}" type="button" data-bs-target="#heroCarousel"
+                        th:attr="data-bs-slide-to=${stat.index}"
+                        th:classappend="${stat.first} ? 'active' : ''"></button>
                 </div>
 
                 <div class="carousel-inner">
                     <!-- ── Dynamic slides from DB ── -->
-                    <div th:each="comic, stat : ${topComics}"
-                         th:classappend="${stat.first} ? 'active' : ''"
-                         class="carousel-item">
+                    <div th:each="comic, stat : ${topComics}" th:classappend="${stat.first} ? 'active' : ''"
+                        class="carousel-item">
 
                         <!-- Cover image -->
                         <th:block th:if="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
                             <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}"
-                                 th:alt="${comic.title}"
-                                 class="carousel-img">
+                                th:alt="${comic.title}" class="carousel-img">
                         </th:block>
                         <th:block th:unless="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
                             <div class="carousel-img cover-placeholder">
@@ -304,10 +386,10 @@
 
                         <div class="carousel-content">
                             <!-- Genre badges -->
-                            <div class="d-flex flex-wrap gap-2 mb-2" th:if="${comic.genres != null and !comic.genres.isEmpty()}">
-                                <span th:each="genre : ${comic.genres}"
-                                      th:text="${genre.name}"
-                                      class="carousel-badge"></span>
+                            <div class="d-flex flex-wrap gap-2 mb-2"
+                                th:if="${comic.genres != null and !comic.genres.isEmpty()}">
+                                <span th:each="genre : ${comic.genres}" th:text="${genre.name}"
+                                    class="carousel-badge"></span>
                             </div>
 
                             <!-- Title -->
@@ -317,12 +399,11 @@
                             <div class="carousel-meta-row">
                                 <div class="carousel-description-wrap">
                                     <p class="carousel-description mb-0"
-                                       th:text="${comic.description != null ? comic.description : 'Chưa có mô tả.'}">
+                                        th:text="${comic.description != null ? comic.description : 'Chưa có mô tả.'}">
                                         Mô tả truyện...
                                     </p>
                                 </div>
-                                <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}"
-                                   class="btn-read">
+                                <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="btn-read">
                                     <i class="bi bi-info-circle"></i>
                                     Xem thông tin
                                 </a>
@@ -375,10 +456,12 @@
                 <!-- ── Dynamic cards ── -->
                 <div class="col" th:each="comic : ${latestComics}">
                     <div class="manga-card">
-                        <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}" class="manga-main-link text-decoration-none">
+                        <a th:href="@{/comic-detail/{id}(id=${comic.comicId})}"
+                            class="manga-main-link text-decoration-none">
                             <div class="manga-thumbnail">
                                 <th:block th:if="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
-                                    <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}" th:alt="${comic.title}">
+                                    <img th:src="${comic.coverImage.startsWith('http') ? comic.coverImage : minioUrl + '/comics/' + comic.coverImage}"
+                                        th:alt="${comic.title}">
                                 </th:block>
                                 <th:block th:unless="${comic.coverImage != null and !comic.coverImage.isEmpty()}">
                                     <div class="cover-placeholder">
@@ -392,11 +475,13 @@
                                 <div class="manga-stats-row">
                                     <span class="manga-stat">
                                         <i class="bi bi-eye"></i>
-                                        <span th:text="${#numbers.formatInteger(comic.totalViews ?: 0, 0, 'COMMA')}">0</span>
+                                        <span
+                                            th:text="${#numbers.formatInteger(comic.totalViews ?: 0, 0, 'COMMA')}">0</span>
                                     </span>
                                     <span class="manga-stat">
                                         <i class="bi bi-heart-fill"></i>
-                                        <span th:text="${#numbers.formatInteger(comic.totalFollows ?: 0, 0, 'COMMA')}">0</span>
+                                        <span
+                                            th:text="${#numbers.formatInteger(comic.totalFollows ?: 0, 0, 'COMMA')}">0</span>
                                     </span>
                                 </div>
                             </div>
@@ -404,10 +489,11 @@
                         <!-- Latest chapter link (nếu có) -->
                         <th:block th:if="${comic.chapters != null and !comic.chapters.isEmpty()}">
                             <a th:href="@{/comic-reading/{id}(id=${comic.chapters[0].chapterId})}"
-                               class="chapter-item text-decoration-none">
-                                <span th:text="'Ch. ' + ${comic.chapters[0].chapterNum.stripTrailingZeros().toPlainString()}">Ch. 1</span>
-                                <span class="chap-time"
-                                      th:attr="data-time=${comic.lastChapterAt}">...</span>
+                                class="chapter-item text-decoration-none">
+                                <span
+                                    th:text="'Ch. ' + ${comic.chapters[0].chapterNum.stripTrailingZeros().toPlainString()}">Ch.
+                                    1</span>
+                                <span class="chap-time" th:attr="data-time=${comic.lastChapterAt}">...</span>
                             </a>
                         </th:block>
 
@@ -420,7 +506,8 @@
                 </div>
 
                 <!-- ── Fallback nếu chưa có truyện ── -->
-                <div class="col-12 text-center py-5 text-secondary" th:if="${latestComics == null or latestComics.isEmpty()}">
+                <div class="col-12 text-center py-5 text-secondary"
+                    th:if="${latestComics == null or latestComics.isEmpty()}">
                     <i class="bi bi-book" style="font-size:3rem; opacity:0.3;"></i>
                     <p class="mt-2">Chưa có truyện nào. Hãy thêm truyện vào hệ thống!</p>
                 </div>
@@ -433,7 +520,8 @@
     ═══════════════════════════════════════════════════════════════ -->
     <footer class="footer">
         <div class="container-fluid px-3 px-md-4">
-            <div class="mx-auto d-flex flex-column flex-md-row justify-content-between align-items-center gap-4" style="max-width: 1280px;">
+            <div class="mx-auto d-flex flex-column flex-md-row justify-content-between align-items-center gap-4"
+                style="max-width: 1280px;">
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-book" style="color: var(--primary);"></i>
                     <span class="fw-bold">MangaRead</span>
@@ -455,34 +543,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/navbar-client.js"></script>
     <script>
-    // ── Thời gian tương đối cho chapter ─────────────────────────────
-    (function () {
-        function relativeTime(isoStr) {
-            if (!isoStr) return '';
-            // Thymeleaf renders LocalDateTime as "2025-03-23T10:30:00"
-            var d = new Date(isoStr);
-            var now = new Date();
-            var diffMs = now - d;
-            var diffSec = Math.floor(diffMs / 1000);
-            var diffMin = Math.floor(diffSec / 60);
-            var diffHour = Math.floor(diffMin / 60);
-            var diffDay = Math.floor(diffHour / 24);
-            if (diffSec < 60)  return 'Vừa xong';
-            if (diffMin < 60)  return diffMin + ' phút trước';
-            if (diffHour < 24) return diffHour + ' giờ trước';
-            if (diffDay < 7)   return diffDay + ' ngày trước';
-            // Quá 7 ngày → hiện dd/MM/yyyy
-            var dd = String(d.getDate()).padStart(2,'0');
-            var mm = String(d.getMonth()+1).padStart(2,'0');
-            var yyyy = d.getFullYear();
-            return dd + '/' + mm + '/' + yyyy;
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.chap-time[data-time]').forEach(function (el) {
-                el.textContent = relativeTime(el.getAttribute('data-time'));
+        // ── Thời gian tương đối cho chapter ─────────────────────────────
+        (function () {
+            function relativeTime(isoStr) {
+                if (!isoStr) return '';
+                // Thymeleaf renders LocalDateTime as "2025-03-23T10:30:00"
+                var d = new Date(isoStr);
+                var now = new Date();
+                var diffMs = now - d;
+                var diffSec = Math.floor(diffMs / 1000);
+                var diffMin = Math.floor(diffSec / 60);
+                var diffHour = Math.floor(diffMin / 60);
+                var diffDay = Math.floor(diffHour / 24);
+                if (diffSec < 60) return 'Vừa xong';
+                if (diffMin < 60) return diffMin + ' phút trước';
+                if (diffHour < 24) return diffHour + ' giờ trước';
+                if (diffDay < 7) return diffDay + ' ngày trước';
+                // Quá 7 ngày → hiện dd/MM/yyyy
+                var dd = String(d.getDate()).padStart(2, '0');
+                var mm = String(d.getMonth() + 1).padStart(2, '0');
+                var yyyy = d.getFullYear();
+                return dd + '/' + mm + '/' + yyyy;
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.chap-time[data-time]').forEach(function (el) {
+                    el.textContent = relativeTime(el.getAttribute('data-time'));
+                });
             });
-        });
-    })();
+        })();
     </script>
 </body>
+
 </html>

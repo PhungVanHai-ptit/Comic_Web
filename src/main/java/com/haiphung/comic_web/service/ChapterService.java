@@ -143,7 +143,7 @@ public class ChapterService {
      * @param newFiles        New image files uploaded by the user (may be empty)
      */
     @Transactional(rollbackFor = Exception.class)
-    public void updateChapterImagesWithOrder(Chapter chapter, String keptImageIndices, MultipartFile[] newFiles) throws Exception {
+    public void updateChapterImagesWithOrder(Chapter chapter, String unifiedOrder, MultipartFile[] newFiles) throws Exception {
         Integer comicId = chapter.getComic().getComicId();
         Integer chapterId = chapter.getChapterId();
         String comicFolder = "comic-" + comicId;
@@ -154,26 +154,24 @@ public class ChapterService {
         try {
             int slot = 0;
 
-            // Step 1: Copy kept existing images to temp in specified order
-            if (keptImageIndices != null && !keptImageIndices.trim().isEmpty() && oldResourcePath != null && !oldResourcePath.trim().isEmpty()) {
-                String[] parts = keptImageIndices.split(",");
+            if (unifiedOrder != null && !unifiedOrder.trim().isEmpty()) {
+                String[] parts = unifiedOrder.split(",");
                 for (String part : parts) {
                     part = part.trim();
                     if (part.isEmpty()) continue;
-                    int origIndex = Integer.parseInt(part);
-                    slot++;
-                    String srcObj = comicFolder + "/chapters/" + oldResourcePath + "/" + origIndex + ".jpg";
-                    String dstObj = tempPrefix + slot + ".jpg";
-                    minioService.copyObject(srcObj, dstObj);
-                }
-            }
 
-            // Step 2: Upload new files to temp after existing ones
-            if (newFiles != null) {
-                for (MultipartFile file : newFiles) {
-                    if (file != null && !file.isEmpty()) {
-                        slot++;
-                        minioService.uploadTempChapterImage(comicFolder, tempFolder, file, slot);
+                    slot++;
+                    if (part.startsWith("existing:")) {
+                        int origIndex = Integer.parseInt(part.substring(9));
+                        String srcObj = comicFolder + "/chapters/" + oldResourcePath + "/" + origIndex + ".jpg";
+                        String dstObj = tempPrefix + slot + ".jpg";
+                        minioService.copyObject(srcObj, dstObj);
+                    } else if (part.startsWith("new:")) {
+                        int newIdx = Integer.parseInt(part.substring(4));
+                        if (newFiles != null && newIdx < newFiles.length) {
+                            MultipartFile file = newFiles[newIdx];
+                            minioService.uploadTempChapterImage(comicFolder, tempFolder, file, slot);
+                        }
                     }
                 }
             }
