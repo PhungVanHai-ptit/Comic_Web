@@ -170,4 +170,37 @@ public class MinioService {
                         .build()
         );
     }
+
+    // Lấy đuôi file
+    public String getFileExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return ".jpg"; // Default
+        }
+        return filename.substring(filename.lastIndexOf(".")).toLowerCase();
+    }
+
+    // Upload file với tên tùy chọn và trả về objectName chuẩn
+    public String uploadChapterImageWithCustomName(String comicFolder, String chapterFolder, String customName, MultipartFile file) throws Exception {
+        String objectName = comicFolder + "/chapters/" + chapterFolder + "/" + customName;
+        minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(COMIC_BUCKET)
+                        .object(objectName)
+                        .stream(file.getInputStream(), file.getSize(), -1)
+                        .contentType(file.getContentType())
+                        .build()
+        );
+        return objectName;
+    }
+
+    // Xóa một file cụ thể
+    public void deleteFileByPath(String path) throws Exception {
+         if (path == null || path.isEmpty()) return;
+         minioClient.removeObject(
+                 RemoveObjectArgs.builder()
+                         .bucket(COMIC_BUCKET)
+                         .object(path)
+                         .build()
+         );
+    }
 }

@@ -31,7 +31,8 @@ public class AdminGenreController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
             Model model) {
-        Page<Genre> genres = adminGenreService.searchGenresByName(keyword, DEFAULT_GENRE_PAGEABLE);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Page<Genre> genres = adminGenreService.searchGenresByName(keyword, pageable);
         model.addAttribute("keyword", keyword);
         model.addAttribute("genre", new Genre());
         model.addAttribute("genres", genres);

@@ -126,6 +126,7 @@ public class AdminChapterController {
         Chapter existing = existingOpt.get();
         existing.setChapterNum(chapter.getChapterNum());
         existing.setTitle(chapter.getTitle());
+        existing.setRequireLogin(chapter.isRequireLogin());
         
         Chapter savedChapter = adminChapterService.saveChapter(existing);
 

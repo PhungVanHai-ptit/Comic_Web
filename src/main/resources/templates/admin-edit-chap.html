@@ -36,6 +36,20 @@
         .info-alert-text { font-size: 0.875rem; color: var(--secondary-text); }
         .info-alert-text strong { color: var(--primary); }
         .page-count-badge { padding: 0.25rem 0.75rem; background-color: var(--background-dark); border: 1px solid var(--surface-border); border-radius: 9999px; font-size: 0.75rem; font-weight: 500; color: var(--secondary-text); }
+
+        /* Toggle switch màu primary */
+        #requireLoginToggle {
+            background-color: var(--surface-border);
+            border-color: var(--surface-border);
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        #requireLoginToggle:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        #requireLoginToggle:focus {
+            box-shadow: 0 0 0 0.2rem rgba(140, 37, 244, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -88,11 +102,24 @@
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label-custom">Số chapter <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" th:field="*{chapterNum}" placeholder="VD: 1">
+                                    <input type="number" class="form-control" th:field="*{chapterNum}" placeholder="VD: 1" step="0.01" min="0.01">
                                 </div>
                                 <div class="col-md-9">
                                     <label class="form-label-custom">Tiêu đề chapter (Tùy chọn)</label>
                                     <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tiêu đề chapter...">
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch d-flex align-items-center gap-3 ms-2 mt-2">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="requireLoginToggle" th:field="*{requireLogin}"
+                                               style="width:2.5rem;height:1.35rem;cursor:pointer;flex-shrink:0;">
+                                        <div>
+                                            <label class="form-label-custom mb-0" for="requireLoginToggle" style="cursor:pointer;">
+                                                <i class="bi bi-lock me-1" style="color:var(--primary);"></i>
+                                                Yêu cầu đăng nhập để đọc
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -106,7 +133,7 @@
                                     <i class="bi bi-images text-primary"></i>
                                     Trang chapter
                                 </h3>
-                                <span class="page-count-badge" id="pageCount" th:text="${chapter.imageCount != null ? chapter.imageCount + ' Trang đã chọn' : '0 Trang'}">15 Trang</span>
+                                <span class="page-count-badge" id="pageCount" th:text="${chapter.imagePaths != null ? chapter.imagePaths.size() + ' Trang đã chọn' : '0 Trang'}">15 Trang</span>
                             </div>
                         </div>
                         <div class="form-card-body">
@@ -164,6 +191,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <script th:inline="javascript">
+        /*<![CDATA[*/
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const pageCount = document.getElementById('pageCount');
@@ -178,16 +206,20 @@
         let placeholderIndex = null;
 
         // ========== Pre-load existing images ==========
-        /*[# th:if="${chapter.imageCount != null && chapter.imageCount > 0}"]*/
-        /*[# th:each="i : ${#numbers.sequence(1, chapter.imageCount)}"]*/
-        allImages.push({
-            type: 'existing',
-            origIndex: /*[[${i}]]*/ 0,
-            url: /*[[${minioUrl + '/comics/comic-' + comic.comicId + '/chapters/' + chapter.resourcePath + '/' + i + '.jpg'}]]*/ '',
-            name: /*[[${i + '.jpg'}]]*/ ''
-        });
-        /*[/]*/
-        /*[/]*/
+        const minioUrl = /*[[${minioUrl}]]*/ '';
+        const comicId = /*[[${comic.comicId}]]*/ 0;
+        let paths = /*[[${chapter.imagePaths}]]*/ [];
+
+        if (paths && paths.length > 0) {
+            paths.forEach((path, index) => {
+                allImages.push({
+                    type: 'existing',
+                    origIndex: index,
+                    url: minioUrl + '/comics/' + path,
+                    name: path.split('/').pop()
+                });
+            });
+        }
 
         window.addEventListener('DOMContentLoaded', function() {
             displayPreview();
@@ -359,8 +391,9 @@
 
         /* ========== Submit ========== */
         function submitChapterForm() {
-            if (!document.getElementById('chapterNum').value) {
-                alert('Vui lòng nhập số chapter!');
+            const chapNumVal = document.getElementById('chapterNum').value;
+            if (!chapNumVal || parseFloat(chapNumVal) <= 0) {
+                alert('Vui lòng nhập số chapter hợp lệ (lớn hơn 0)!');
                 document.getElementById('chapterNum').focus();
                 return;
             }
@@ -412,6 +445,7 @@
             const linkPage = link.getAttribute("href");
             if (linkPage && linkPage.includes("comic")) link.classList.add("active");
         });
+        /*]]>*/
     </script>
 </body>
 </html>

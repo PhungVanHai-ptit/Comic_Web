@@ -215,6 +215,11 @@ public class ComicController {
         List<Chapter> chapters = chapterService.getChaptersForReading(comic);
         User currentUser = (userDetails != null) ? userDetails.getUser() : null;
 
+        // Kiểm tra quyền đọc chapter
+        if (!chapterService.canUserReadChapter(chapter, currentUser)) {
+            return "redirect:/auth/login?required";
+        }
+
         Chapter prevChapter = null;
         Chapter nextChapter = null;
         

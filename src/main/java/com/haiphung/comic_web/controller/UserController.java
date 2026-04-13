@@ -229,31 +229,31 @@ public class UserController {
             @RequestParam("avatar") MultipartFile avatarFile) {
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Chưa đăng nhập"));
+            return ResponseEntity.status(401).body(Map.<String, Object>of("success", false, "message", "Chưa đăng nhập"));
         }
         
         try {
             if (avatarFile.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Vui lòng chọn ảnh"));
+                return ResponseEntity.badRequest().body(Map.<String, Object>of("success", false, "message", "Vui lòng chọn ảnh"));
             }
 
             String email = authentication.getName();
             User user = userService.findByEmail(email).orElse(null);
             
             if (user == null) {
-                return ResponseEntity.status(401).body(Map.of("success", false, "message", "Người dùng không tồn tại"));
+                return ResponseEntity.status(401).body(Map.<String, Object>of("success", false, "message", "Người dùng không tồn tại"));
             }
             
             User updatedUser = userService.updateAvatar(user.getUserId(), avatarFile);
             refreshSession(updatedUser);
 
-            return ResponseEntity.ok(Map.of(
+            return ResponseEntity.ok(Map.<String, Object>of(
                     "success", true,
                     "message", "Cập nhật ảnh đại diện thành công",
                     "avatarUrl", updatedUser.getAvatarUrl()
             ));
         } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body(Map.of(
+            return ResponseEntity.internalServerError().body(Map.<String, Object>of(
                     "success", false,
                     "message", "Lỗi khi tải lên ảnh: " + ex.getMessage()
             ));

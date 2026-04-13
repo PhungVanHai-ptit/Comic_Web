@@ -2,6 +2,7 @@ package com.haiphung.comic_web.service;
 
 import com.haiphung.comic_web.entity.Chapter;
 import com.haiphung.comic_web.entity.Comic;
+import com.haiphung.comic_web.entity.User;
 import com.haiphung.comic_web.repository.ChapterRepository;
 import com.haiphung.comic_web.repository.ComicRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,11 +68,15 @@ public class ChapterService {
     public void deleteChapter(Integer id) {
         chapterRepository.findById(id).ifPresent(chapter -> {
             Comic comic = chapter.getComic();
-            if (chapter.getResourcePath() != null) {
-                // Xóa ảnh trên MinIO
-                String folderPath = "comic-" + comic.getComicId() + "/chapters/" + chapter.getResourcePath() + "/";
-                minioService.deleteFolderRecursive(folderPath);
-            }
+//            if (chapter.getImagePaths() != null && !chapter.getImagePaths().isEmpty()) {
+                for (String path : chapter.getImagePaths()) {
+                    try { minioService.deleteFileByPath(path); } catch (Exception e) {}
+                }
+//            } else if (chapter.getResourcePath() != null && !chapter.getResourcePath().isEmpty()) {
+//                // Fallback for un-migrated old data
+//                String folderPath = "comic-" + comic.getComicId() + "/chapters/" + chapter.getResourcePath() + "/";
+//                minioService.deleteFolderRecursive(folderPath);
+//            }
             chapterRepository.delete(chapter);
             refreshLastChapterAt(comic);
         });
@@ -91,7 +96,7 @@ public class ChapterService {
         return comicRepository.findById(comicId);
     }
 
-    // Atomic Temp Upload Commit Logic
+    // Safe JSON Upload Logic
     @Transactional(rollbackFor = Exception.class)
     public void processChapterImages(Chapter chapter, MultipartFile[] files) throws Exception {
         if (files == null || files.length == 0 || files[0].isEmpty()) return;
@@ -99,57 +104,49 @@ public class ChapterService {
         Integer comicId = chapter.getComic().getComicId();
         Integer chapterId = chapter.getChapterId();
         String comicFolder = "comic-" + comicId;
-        String tempFolder = "upload-" + chapterId;
+        String chapterFolder = "chapter-" + chapterId;
         
-        // 1. Upload vào TEMP
+        List<String> uploadedPaths = new ArrayList<>();
+        
         try {
             int count = 0;
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
                     count++;
-                    minioService.uploadTempChapterImage(comicFolder, tempFolder, file, count);
+                    String ext = minioService.getFileExtension(file.getOriginalFilename());
+                    String customName = count + "-" + System.currentTimeMillis() + ext;
+                    String objectName = minioService.uploadChapterImageWithCustomName(comicFolder, chapterFolder, customName, file);
+                    uploadedPaths.add(objectName);
                 }
             }
 
-            // 2. TẤT CẢ SUCCESS -> Commit
-            String newMilisec = System.currentTimeMillis() + "";
-            String newFinalFolder = "chapter-" + chapterId + "-" + newMilisec;
-
-            // Xóa folder chính cũ nếu tồn tại (Update chapter)
-            if (chapter.getResourcePath() != null && !chapter.getResourcePath().isEmpty()) {
-                minioService.deleteFolderRecursive(comicFolder + "/chapters/" + chapter.getResourcePath() + "/");
-            }
-
-            // Move (Copy & Delete) từ temp sang folder chính
-            minioService.commitTempChapter(comicFolder, tempFolder, newFinalFolder, count);
-
-            // Cập nhật CSDL
-            chapter.setResourcePath(newFinalFolder);
-            chapter.setImageCount(count);
+            // Ghi mảng JSON vào DB
+            chapter.setImagePaths(uploadedPaths);
             chapterRepository.save(chapter);
             refreshLastChapterAt(chapter.getComic());
 
         } catch (Exception e) {
-            // 3. ANY ERROR -> Xóa folder TEMP
-            minioService.deleteFolderRecursive(comicFolder + "/chapters/temp/" + tempFolder + "/");
-            throw new Exception("Lỗi khi tải ảnh lên, đã xóa bộ nhớ đệm an toàn: " + e.getMessage());
+            // DB fail hoặc upload fail -> Rollback an toàn
+            for (String path : uploadedPaths) {
+                try { minioService.deleteFileByPath(path); } catch (Exception ex) {}
+            }
+            throw new Exception("Lỗi khi tải ảnh lên, đã dọn dẹp file an toàn: " + e.getMessage());
         }
     }
 
     /**
-     * Update chapter images, keeping existing images in a new user-specified order plus appending new ones.
-     * @param chapter         The chapter entity (must have resourcePath set if it has images)
-     * @param keptImageIndices Comma-separated 1-based indices of the old images to keep, in desired order (e.g. "3,1,2")
-     * @param newFiles        New image files uploaded by the user (may be empty)
+     * Update chapter images logic 3-step Anti-Data-Loss Action
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateChapterImagesWithOrder(Chapter chapter, String unifiedOrder, MultipartFile[] newFiles) throws Exception {
         Integer comicId = chapter.getComic().getComicId();
         Integer chapterId = chapter.getChapterId();
         String comicFolder = "comic-" + comicId;
-        String oldResourcePath = chapter.getResourcePath();
-        String tempFolder = "upload-edit-" + chapterId;
-        String tempPrefix = comicFolder + "/chapters/temp/" + tempFolder + "/";
+        String chapterFolder = "chapter-" + chapterId;
+
+        List<String> oldImagePaths = chapter.getImagePaths() != null ? new ArrayList<>(chapter.getImagePaths()) : new ArrayList<>();
+        List<String> newUploadedPaths = new ArrayList<>();
+        List<String> finalImagePaths = new ArrayList<>();
 
         try {
             int slot = 0;
@@ -163,40 +160,49 @@ public class ChapterService {
                     slot++;
                     if (part.startsWith("existing:")) {
                         int origIndex = Integer.parseInt(part.substring(9));
-                        String srcObj = comicFolder + "/chapters/" + oldResourcePath + "/" + origIndex + ".jpg";
-                        String dstObj = tempPrefix + slot + ".jpg";
-                        minioService.copyObject(srcObj, dstObj);
+                        if(origIndex >= 0 && origIndex < oldImagePaths.size()) {
+                            finalImagePaths.add(oldImagePaths.get(origIndex));
+                        }
                     } else if (part.startsWith("new:")) {
                         int newIdx = Integer.parseInt(part.substring(4));
                         if (newFiles != null && newIdx < newFiles.length) {
                             MultipartFile file = newFiles[newIdx];
-                            minioService.uploadTempChapterImage(comicFolder, tempFolder, file, slot);
+                            String ext = minioService.getFileExtension(file.getOriginalFilename());
+                            String customName = slot + "-" + System.currentTimeMillis() + ext;
+                            String objectName = minioService.uploadChapterImageWithCustomName(comicFolder, chapterFolder, customName, file);
+                            newUploadedPaths.add(objectName);
+                            finalImagePaths.add(objectName);
                         }
                     }
                 }
             }
 
-            if (slot == 0) {
+            if (finalImagePaths.isEmpty()) {
                 throw new Exception("Chapter phải có ít nhất 1 ảnh!");
             }
 
-            // Step 3: Commit - create new final folder from temp
-            String newFinalFolder = "chapter-" + chapterId + "-" + System.currentTimeMillis();
-            minioService.commitTempChapter(comicFolder, tempFolder, newFinalFolder, slot);
-
-            // Step 4: Delete old folder
-            if (oldResourcePath != null && !oldResourcePath.trim().isEmpty()) {
-                minioService.deleteFolderRecursive(comicFolder + "/chapters/" + oldResourcePath + "/");
-            }
-
-            // Step 5: Update DB
-            chapter.setResourcePath(newFinalFolder);
-            chapter.setImageCount(slot);
+            // Bước 2: Commit DB
+            chapter.setImagePaths(finalImagePaths);
             chapterRepository.save(chapter);
             refreshLastChapterAt(chapter.getComic());
 
+            // Bước 3: Dọn Rác  (Xóa file không cần thiết trên MinIO)
+            List<String> orphanedPaths = new ArrayList<>(oldImagePaths);
+            orphanedPaths.removeAll(finalImagePaths);
+            
+            for (String path : orphanedPaths) {
+                try {
+                    minioService.deleteFileByPath(path);
+                } catch (Exception e) {
+                    System.err.println("[CLEANUP NEEDED] Orphan file not deleted: " + path + " - Lỗi: " + e.getMessage());
+                }
+            }
+
         } catch (Exception e) {
-            minioService.deleteFolderRecursive(tempPrefix);
+            // Bước Khẩn Cấp: Rollback chỉ ảnh MỚI upload nếu DB sập. Không chạm vào Dữ liệu đang có của Truyện.
+            for (String path : newUploadedPaths) {
+                try { minioService.deleteFileByPath(path); } catch (Exception ex) {}
+            }
             throw new Exception("Lỗi cập nhật ảnh chapter: " + e.getMessage());
         }
     }
@@ -237,6 +243,12 @@ public class ChapterService {
         // actually let's just reverse it or sort it here to be safe
         chapters.sort(java.util.Comparator.comparing(Chapter::getChapterNum));
         return chapters;
+    }
+
+    //Kiểm tra user có quyền đọc chapter hay không.
+    public boolean canUserReadChapter(Chapter chapter, User currentUser) {
+        if (!chapter.isRequireLogin()) return true;
+        return currentUser != null;
     }
 }
 

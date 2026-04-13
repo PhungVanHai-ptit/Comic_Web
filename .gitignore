@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Config ###
+src/main/resources/application-local.properties
+
+### Batch Files ###
+build.bat
+compile.bat
+restore_files.bat

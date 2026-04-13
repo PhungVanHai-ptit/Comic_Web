@@ -385,6 +385,8 @@
             coverFileInput.click();
         });
 
+        const originalCoverSrc = coverImage.src;
+
         // Handle file upload
         coverFileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -393,6 +395,8 @@
                 // Validate file type
                 if (!file.type.startsWith('image/')) {
                     alert('Vui lòng chọn file ảnh!');
+                    coverFileInput.value = '';
+                    coverImage.src = originalCoverSrc;
                     return;
                 }
 
@@ -400,6 +404,7 @@
                 if (file.size > 1024 * 1024) {
                     alert('Kích thước file không được vượt quá 1MB!');
                     coverFileInput.value = '';
+                    coverImage.src = originalCoverSrc;
                     return;
                 }
 
@@ -411,6 +416,8 @@
                 };
                 
                 reader.readAsDataURL(file);
+            } else {
+                coverImage.src = originalCoverSrc;
             }
         });
 

@@ -554,14 +554,40 @@
 
                 <div class="chapter-list-scroll">
                     <th:block th:each="chapter : ${chapters}">
-                        <a th:href="@{/comic-reading/{id}(id=${chapter.chapterId})}" class="chapter-card">
+                        <!--/* Chapter YÊU CẦU đăng nhập + user CHƯA đăng nhập */-->
+                        <div th:if="${chapter.requireLogin and #authentication.name == 'anonymousUser'}"
+                             class="chapter-card"
+                             style="cursor:pointer;"
+                             onclick="window.location.href='/auth/login?required'">
 
                             <div class="chapter-number" th:text="${chapter.chapterNum.stripTrailingZeros().toPlainString()}">1</div>
                             <div class="chapter-info">
                                 <div class="chapter-title" th:text="${chapter.title != null ? chapter.title : 'Chương ' + chapter.chapterNum.stripTrailingZeros().toPlainString()}">Chapter Title</div>
                                 <div class="chapter-date" th:text="${#temporals.format(chapter.createdAt, 'dd/MM/yyyy')}">01/01/2024</div>
                             </div>
-                            <i class="bi bi-chevron-right chapter-arrow"></i>
+                            <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.7rem;font-weight:700;
+                                         padding:0.25rem 0.6rem;border-radius:9999px;white-space:nowrap;flex-shrink:0;
+                                         background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.35);">
+                                <i class="bi bi-lock-fill" style="font-size:0.75rem;"></i> Đăng nhập
+                            </span>
+                        </div>
+
+                        <!--/* Chapter bình thường HOẶC user đã đăng nhập */-->
+                        <a th:if="${!chapter.requireLogin or #authentication.name != 'anonymousUser'}"
+                           th:href="@{/comic-reading/{id}(id=${chapter.chapterId})}" class="chapter-card">
+
+                            <div class="chapter-number" th:text="${chapter.chapterNum.stripTrailingZeros().toPlainString()}">1</div>
+                            <div class="chapter-info">
+                                <div class="chapter-title" th:text="${chapter.title != null ? chapter.title : 'Chương ' + chapter.chapterNum.stripTrailingZeros().toPlainString()}">Chapter Title</div>
+                                <div class="chapter-date" th:text="${#temporals.format(chapter.createdAt, 'dd/MM/yyyy')}">01/01/2024</div>
+                            </div>
+                            <span th:if="${chapter.requireLogin}"
+                                  style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.7rem;font-weight:700;
+                                         padding:0.25rem 0.6rem;border-radius:9999px;white-space:nowrap;flex-shrink:0;
+                                         background:rgba(140,37,244,0.12);color:var(--primary);border:1px solid rgba(140,37,244,0.25);">
+                                <i class="bi bi-unlock" style="font-size:0.75rem;"></i> Thành viên
+                            </span>
+                            <i th:if="${!chapter.requireLogin}" class="bi bi-chevron-right chapter-arrow"></i>
                         </a>
                     </th:block>
                 </div>

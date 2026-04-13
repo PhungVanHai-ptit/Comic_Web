@@ -298,11 +298,14 @@
     <!-- ── Manga Pages ── -->
     <main class="manga-pages">
         <div class="page-wrapper">
-            <div class="manga-page" th:each="i : ${#numbers.sequence(1, chapter.imageCount)}">
-                <img th:src="${minioUrl + '/comics/comic-' + comic.comicId + '/chapters/' + chapter.resourcePath + '/' + i + '.jpg'}" 
-                     th:alt="'Trang ' + ${i}" 
-                     loading="lazy">
-            </div>
+            <!-- Modern JSON Flow -->
+            <th:block th:if="${chapter.imagePaths != null and !chapter.imagePaths.isEmpty()}">
+                <div class="manga-page" th:each="path, stat : ${chapter.imagePaths}">
+                    <img th:src="${minioUrl + '/comics/' + path}" 
+                         th:alt="'Trang ' + ${stat.count}" 
+                         loading="lazy">
+                </div>
+            </th:block>
         </div>
     </main>
 

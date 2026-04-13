@@ -36,6 +36,20 @@
         .info-alert-text { font-size: 0.875rem; color: var(--secondary-text); }
         .info-alert-text strong { color: var(--primary); }
         .page-count-badge { padding: 0.25rem 0.75rem; background-color: var(--background-dark); border: 1px solid var(--surface-border); border-radius: 9999px; font-size: 0.75rem; font-weight: 500; color: var(--secondary-text); }
+
+        /* Toggle switch màu primary */
+        #requireLoginToggle {
+            background-color: var(--surface-border);
+            border-color: var(--surface-border);
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        #requireLoginToggle:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        #requireLoginToggle:focus {
+            box-shadow: 0 0 0 0.2rem rgba(140, 37, 244, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -88,11 +102,24 @@
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label-custom">Số chapter <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" th:field="*{chapterNum}" placeholder="VD: 1">
+                                    <input type="number" class="form-control" th:field="*{chapterNum}" placeholder="VD: 1" step="0.01" min="0.01">
                                 </div>
                                 <div class="col-md-9">
                                     <label class="form-label-custom">Tiêu đề chapter (Tùy chọn)</label>
                                     <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tiêu đề chapter...">
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch d-flex align-items-center gap-3 ms-2 mt-2">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="requireLoginToggle" th:field="*{requireLogin}"
+                                               style="width:2.5rem;height:1.35rem;cursor:pointer;flex-shrink:0;">
+                                        <div>
+                                            <label class="form-label-custom mb-0" for="requireLoginToggle" style="cursor:pointer;">
+                                                <i class="bi bi-lock me-1" style="color:var(--primary);"></i>
+                                                Yêu cầu đăng nhập để đọc
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -413,8 +440,9 @@
                 alert('Vui lòng chọn ít nhất 1 ảnh cho chapter!');
                 return;
             }
-            if (!document.getElementById('chapterNum').value) {
-                alert('Vui lòng nhập số chapter!');
+            const chapNumVal = document.getElementById('chapterNum').value;
+            if (!chapNumVal || parseFloat(chapNumVal) <= 0) {
+                alert('Vui lòng nhập số chapter hợp lệ (lớn hơn 0)!');
                 document.getElementById('chapterNum').focus();
                 return;
             }

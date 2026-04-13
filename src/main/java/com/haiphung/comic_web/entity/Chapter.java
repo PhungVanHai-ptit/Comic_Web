@@ -5,6 +5,10 @@ package com.haiphung.comic_web.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.haiphung.comic_web.config.StringListConverter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,11 +31,21 @@ public class Chapter {
 
     private String title;
 
-    @Column(name = "image_count")
-    private Integer imageCount = 0;
+    
+//    @Deprecated
+//    @Column(name = "image_count")
+//    private Integer imageCount = 0;
+//
+//    @Deprecated
+//    @Column(name = "resource_path")
+//    private String resourcePath;
 
-    @Column(name = "resource_path")
-    private String resourcePath;
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "image_paths", columnDefinition = "JSON")
+    private List<String> imagePaths = new ArrayList<>();
+
+    @Column(name = "require_login", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean requireLogin = false;
 
     private Integer views = 0;
 
